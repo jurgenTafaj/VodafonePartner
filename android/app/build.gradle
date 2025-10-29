@@ -77,9 +77,9 @@ android {
     buildToolsVersion rootProject.ext.buildToolsVersion
     compileSdk rootProject.ext.compileSdkVersion
 
-    namespace "com.vodafonepartner"
+    namespace "my_vodafone.qr_code_scanner"
     defaultConfig {
-        applicationId "com.vodafonepartner"
+        applicationId "my_vodafone.qr_code_scanner"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
         versionCode 1

@@ -32,7 +32,7 @@ const getHtml = (siteKey) => `
         // 2. Function called when the reCAPTCHA script finishes loading.
         var onloadCallback = function() {
             grecaptcha.render('captcha-container', {
-                'sitekey' : '6LcKK60UAAAAAGc12CLNY22bt0hnGIYcUbXzDaOA',
+                'sitekey' : '6LeV8_orAAAAAFr3ZCTCisdL3EzqC3lnNktHbulR',
                 'callback' : onCaptchaVerify,
                 'theme' : 'light' 
             });

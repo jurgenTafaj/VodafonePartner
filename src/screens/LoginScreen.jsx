@@ -63,10 +63,10 @@ export function LoginScreen() {
             Alert.alert("Error", "Please enter both email and password.");
             return;
         }
-        if (!captchaToken) {
-            Alert.alert("Error", "Please complete the Captcha verification.");
-            return;
-        }
+        // if (!captchaToken) {
+        //     Alert.alert("Error", "Please complete the Captcha verification.");
+        //     return;
+        // }
 
         setLoading(true);
         try {
@@ -80,7 +80,7 @@ export function LoginScreen() {
         }
     };
 
-    const isLoginDisabled = !email || !password || !captchaToken;
+    const isLoginDisabled = !email || !password // || !captchaToken;
 
     return (
         <View style={styles.container}>

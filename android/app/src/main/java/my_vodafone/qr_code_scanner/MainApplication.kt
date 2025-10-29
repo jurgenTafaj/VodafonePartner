@@ -1,4 +1,4 @@
-package com.vodafonepartner
+package my_vodafone.qr_code_scanner
 
 import android.app.Application
 import com.facebook.react.PackageList

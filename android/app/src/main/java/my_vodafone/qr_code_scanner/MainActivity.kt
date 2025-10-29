@@ -1,4 +1,4 @@
-package com.vodafonepartner
+package my_vodafone.qr_code_scanner
 
 import com.facebook.react.ReactActivity
 import com.facebook.react.ReactActivityDelegate

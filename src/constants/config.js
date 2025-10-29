@@ -1,7 +1,7 @@
 // src/constants/config.js (FIXED: Removing separate endpoint paths)
 
 // Replace with your single, unchanging API URL for all actions
-export const API_URL = 'https://your-api-domain.com/api/v1/user_endpoint'; 
+export const API_URL = 'https://mobileapi.vodafonecoupons.al/v.2/'; 
 
 // REFRESH_URL and LOGIN_URL are REMOVED. The 'action' field dictates the endpoint.
 

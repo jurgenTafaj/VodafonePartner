@@ -39,7 +39,7 @@ apiClient.interceptors.response.use(
     (response) => response,
     async (error) => {
         const originalRequest = error.config;
-        
+        console.log("API Client Response Error Interceptor Triggered:", error.response?.status, " KKK ",  originalRequest.url);
         // This check is now simplified: if status is 401, we try to refresh.
         if (error.response?.status !== 401) {
             return Promise.reject(error);
