@@ -18,7 +18,7 @@ export default function HomeScreen() {
 
       <View style={{ flexDirection: 'row' }}>
         <View style={{ marginLeft: 50 }}>
-          <TouchableOpacity style={{ marginRight: 20, marginTop: -250 }}>
+          <TouchableOpacity style={{ marginRight: 20, marginTop: -250 }} onPress={() => navigation.navigate('Scanner')}>
             <ImageBackground
               source={require('../assets/pictures/button_qr.png')}
               style={{ width: 140, height: 50 }} //hoqa flex 1 nga ky stilizim

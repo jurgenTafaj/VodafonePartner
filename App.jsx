@@ -12,7 +12,7 @@ import LogoutScreen from './src/screens/LogOutScreen';
 import SettingsScreen from './src/screens/SettingsScreen';
 import InfoScreen from './src/screens/InfoScreen';
 import BottomTab from './src/components/BottomTab';
-
+import CameraScann from './src/screens/CameraScann';
 // Import your AuthProvider and useAuth hook
 import { AuthProvider, useAuth } from './src/context/AuthContext';
 
@@ -54,6 +54,7 @@ const AppNavigator = () => {
           <Stack.Screen name="Logout" component={LogoutScreen} />
           <Stack.Screen name="Settings" component={SettingsScreen} />
           <Stack.Screen name="Info" component={InfoScreen} />
+          <Stack.Screen name="Scanner" component={CameraScann} />
         </>
       )}
     </Stack.Navigator>
