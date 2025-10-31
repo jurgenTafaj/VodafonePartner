@@ -19,7 +19,7 @@ export default function BottomTab() {
         backgroundColor: '#db0000ff',
         borderTopWidth: 0,
         elevation: 5,
-        height: 60
+        height: 60,
       }
     }}>
 
@@ -35,7 +35,6 @@ export default function BottomTab() {
           </View>
         ),
       }} />
-
 
       <Tab.Screen name="Info" component={InfoScreen} options={{
         tabBarIcon: ({ focused }) => (
@@ -90,6 +89,11 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
+    alignItems: 'center',
+    justifyContent: 'center',
+    height: '100%',
+    width: '100%',
+
   },
   icon: {
     width: 35,

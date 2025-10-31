@@ -16,7 +16,7 @@ const HeaderImage = ({ text1, imageURL, text2 }) => {
 
           <View style={styles.header}>
             <Image source={image[imageURL]} style={styles.imageHeader} />
-            <View style={{ paddingTop: 10 }}>
+            <View style={{ paddingTop: 60 }}>
               <Text style={styles.text1}>{text1}</Text>
               <Text style={styles.text2}>{text2}</Text>
               <Image source={require('../assets/pictures/partner_pic.png')} style={styles.logo} />
@@ -35,12 +35,13 @@ const styles = StyleSheet.create({
   },
   background: {
     flex: 1,
-    height: 150
+    height: 200
   },
   imageHeader: {
     width: 60,
     height: 60,
-    marginLeft: 10
+    marginLeft: 10,
+    marginTop: 45
   },
   text1: {
     color: '#ffffffff'

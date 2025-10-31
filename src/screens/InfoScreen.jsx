@@ -1,14 +1,32 @@
 import { View, Text, Image, StyleSheet, TouchableOpacity, ScrollView } from 'react-native'
 import Table from '../components/Table'
 import HeaderImage from '../components/HeaderImage'
+import { useEffect, useState } from 'react';
+import MyDatePicker from '../components/MyDatePicker'
 
 
 export default function InfoScreen() {
 
+  const [isPickerVisible, setPickerVisible] = useState(false);
+  const [chosenDate, setChosenDate] = useState(null);
+  const [activeButton, setActiveButton] = useState(null); // to know which button triggered the picker
+
+  const showPicker = (buttonName) => {
+    setActiveButton(buttonName);
+    setPickerVisible(true);
+  };
+
+  const hidePicker = () => setPickerVisible(false);
+
+  const handleDateConfirm = (date) => {
+    setChosenDate({ button: activeButton, date }); // store which button's date
+    hidePicker();
+  };
+
   return (
     <>
       <HeaderImage text1="PERDORUESI" text2="adrionadmin" imageURL="notHome" />
-      <View style={{ flex: 1, marginTop: -400 }}>
+      <View style={{ flex: 1, marginTop: -420 }}>
         <ScrollView styles={styles.scrollView}>
 
           <View style={{ flexDirection: 'row', marginHorizontal: 15 }}>
@@ -17,12 +35,24 @@ export default function InfoScreen() {
           </View>
 
           <View style={{ flexDirection: 'row' }}>
-            <TouchableOpacity style={styles.buton}>
+            <TouchableOpacity style={styles.buton} onPress={() => showPicker('Nga')}>
               <Text>Nga</Text>
             </TouchableOpacity>
-            <TouchableOpacity style={styles.buton}>
+            <TouchableOpacity style={styles.buton} onPress={() => showPicker('Deri')}>
               <Text>Deri</Text>
             </TouchableOpacity>
+
+            {chosenDate && (
+              <Text style={{ marginTop: 20 }}>
+                {chosenDate.button}: {chosenDate.date.toDateString()}
+              </Text>
+            )}
+
+            <MyDatePicker
+              visible={isPickerVisible}
+              onConfirm={handleDateConfirm}
+              onCancel={hidePicker}
+            />
           </View>
 
           <Table kuponi="33346391" fatura="100" zbritja="0" />

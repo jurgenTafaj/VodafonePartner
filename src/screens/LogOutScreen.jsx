@@ -1,7 +1,11 @@
 import { View, Text, Image, TouchableOpacity, StyleSheet } from 'react-native'
 import HeaderImage from '../components/HeaderImage'
+import { useAuth } from '../context/AuthContext';
+
 
 export default function LogOut() {
+
+  const { signOut } = useAuth();
 
   return (
     <>
@@ -17,7 +21,7 @@ export default function LogOut() {
           <TouchableOpacity style={[styles.butoni, { backgroundColor: '#000000ff' }]}>
             <Text style={{ color: 'rgba(255, 255, 255, 1)' }}>Jo</Text>
           </TouchableOpacity>
-          <TouchableOpacity style={[styles.butoni, { backgroundColor: '#f14040ff' }]}>
+          <TouchableOpacity style={[styles.butoni, { backgroundColor: '#f14040ff' }]} onPress={signOut}>
             <Text style={{ color: 'rgba(255, 255, 255, 1)' }}>Po</Text>
           </TouchableOpacity>
         </View>
