@@ -17,6 +17,7 @@ const apiClient = axios.create({
 // This runs BEFORE each request is sent
 apiClient.interceptors.request.use(
   async (config) => {
+    console.log('Preparing request to: config ', config);
     // Get the token from storage
     const token = await AsyncStorage.getItem('userToken');
     
@@ -28,8 +29,9 @@ apiClient.interceptors.request.use(
       // OR, based on your Postman, it might expect it in the form data
       // We check if config.data is a FormData instance
       if (config.data instanceof FormData) {
+        console.log('action: ', config.data._parts[0][1]);
         // Don't add token to login or refresh token requests
-        if (config.data.get('action') !== 'login' && config.data.get('action') !== 'refreshToken') {
+        if (config.data._parts[0][1] !== 'login' && config.data._parts[0][1] !== 'refreshToken') {
            config.data.append('token', token);
         }
       }
