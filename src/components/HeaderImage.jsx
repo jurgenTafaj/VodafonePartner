@@ -4,7 +4,9 @@ const HeaderImage = ({ text1, imageURL, text2 }) => {
 
   const image = {
     home: require('../assets/icons/portofoli.png'),
-    notHome: require('../assets/icons/user_big.png')
+    notHome: require('../assets/icons/user_big.png'),
+    cupon: require('../assets/icons/kuponi.png')
+
   }
   return (
     <>
