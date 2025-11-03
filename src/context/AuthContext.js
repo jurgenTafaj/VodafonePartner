@@ -18,12 +18,13 @@ export const AuthProvider = ({ children }) => {
       const response = await loginUser(username, password);
       console.log('Login response:', response.data, " ", response.data.status_code);      
       if (response.data.status_code === 200) {
-        const { token, refresh_token, user_id } = response.data.data;
-        console.log('Login successful, received tokens:', token," KK ", refresh_token, " MM ",  user_id);
+        const { token, refresh_token, user_id, fullname } = response.data.data;
+        console.log('response.data.data: ' , response.data.data);
         // Store tokens and user ID
         await AsyncStorage.setItem('userToken', token);
         await AsyncStorage.setItem('refreshToken', refresh_token);
         await AsyncStorage.setItem('userId', user_id.toString()); // Store as string
+        await AsyncStorage.setItem('fullName', fullname.toString());
         
         setUserToken(token); // Update state to trigger navigation
       } else {

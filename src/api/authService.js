@@ -64,3 +64,23 @@ export const getCuponDetails = async (couponCode, invoiceAmount) => {
   // The request is sent to the base URL (which the server handles based on the 'action' field)
   return apiClient.post('/', formData); 
 };
+
+export const getSales = async (dateFrom, dateTo, limit = "100") => {
+  const userId = await AsyncStorage.getItem('userId');
+  console.log('Redeeming coupon for user ID:', userId);
+  if (!userId) {
+    throw new Error('User ID not found in storage. Please log in first.');
+  }
+
+  const formData = new FormData();
+  formData.append('action', 'getSales');
+  formData.append('type_id', TYPE_ID); // Static TYPE_ID
+  formData.append('user_id', userId); // Retrieved from storage
+  
+  formData.append('datetime_from', dateFrom);
+  formData.append('datetime_to', dateTo);
+  formData.append('limit', limit);
+
+  // The request is sent to the base URL (which the server handles based on the 'action' field)
+  return apiClient.post('/', formData); 
+};

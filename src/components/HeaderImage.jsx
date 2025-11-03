@@ -1,4 +1,6 @@
 import { View, Text, Image, StyleSheet, ImageBackground } from 'react-native'
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useState, useEffect } from 'react'
 
 const HeaderImage = ({ text1, imageURL, text2 }) => {
 
@@ -6,6 +8,17 @@ const HeaderImage = ({ text1, imageURL, text2 }) => {
     home: require('../assets/icons/portofoli.png'),
     notHome: require('../assets/icons/user_big.png')
   }
+    const [fullName, setFullName] = useState('')
+    const [xhiroDitore, setXhiroDitore] = useState('')
+
+    useEffect(() => {
+      const  getName = async()=>{
+        const name = await AsyncStorage.getItem('fullName');
+        setFullName(name);
+      }
+      getName();
+    }, [])
+  
   return (
     <>
       <View style={{ flex: 1 }}>
@@ -18,7 +31,7 @@ const HeaderImage = ({ text1, imageURL, text2 }) => {
             <Image source={image[imageURL]} style={styles.imageHeader} />
             <View style={{ paddingTop: 60 }}>
               <Text style={styles.text1}>{text1}</Text>
-              <Text style={styles.text2}>{text2}</Text>
+              <Text style={styles.text2}>{text1 === "PERDORUESI" ? fullName:'0'}</Text>
               <Image source={require('../assets/pictures/partner_pic.png')} style={styles.logo} />
             </View>
           </View>
