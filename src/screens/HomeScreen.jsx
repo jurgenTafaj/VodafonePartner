@@ -2,9 +2,11 @@ import { useNavigation } from '@react-navigation/native'
 import { View, Text, Image, ImageBackground, StyleSheet, TouchableOpacity } from 'react-native'
 import HeaderImage from '../components/HeaderImage'
 import MeInputButton from '../components/MeInputButton'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 
 export default function HomeScreen() {
+  
+
   const navigation = useNavigation();
 
   const [showComponent, setShowComponent] = useState(false);

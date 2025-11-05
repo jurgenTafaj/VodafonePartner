@@ -1,4 +1,6 @@
 import { View, Text, Image, StyleSheet, ImageBackground } from 'react-native'
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useState, useEffect } from 'react'
 
 const HeaderImage = ({ text1, imageURL, text2 }) => {
 
@@ -8,6 +10,22 @@ const HeaderImage = ({ text1, imageURL, text2 }) => {
     cupon: require('../assets/icons/kuponi.png')
 
   }
+    const [fullName, setFullName] = useState('')
+    const [profileImg, setProfileImg] = useState('')
+    
+    const [xhiroDitore, setXhiroDitore] = useState('')
+
+    useEffect(() => {
+      const  getName = async()=>{
+        const name = await AsyncStorage.getItem('fullName');
+        const profile_img = await AsyncStorage.getItem('profile_img');
+        
+        setProfileImg(profile_img);
+        setFullName(name);
+      }
+      getName();
+    }, [])
+  
   return (
     <>
       <View style={{ flex: 1 }}>
@@ -20,8 +38,8 @@ const HeaderImage = ({ text1, imageURL, text2 }) => {
             <Image source={image[imageURL]} style={styles.imageHeader} />
             <View style={{ paddingTop: 60 }}>
               <Text style={styles.text1}>{text1}</Text>
-              <Text style={styles.text2}>{text2}</Text>
-              <Image source={require('../assets/pictures/partner_pic.png')} style={styles.logo} />
+              <Text style={styles.text2}>{text1 === "PERDORUESI" ? fullName:'0'}</Text>
+              <Image source={{uri:profileImg}} style={styles.logo} />
             </View>
           </View>
         </ImageBackground >

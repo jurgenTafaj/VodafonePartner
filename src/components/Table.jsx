@@ -1,7 +1,7 @@
 import { View, Text, Image, StyleSheet, TouchableOpacity } from 'react-native'
 import HeaderImage from '../components/HeaderImage'
 
-const Table = ({ kuponi, fatura, zbritja }) => {
+const Table = ({ coupon, invoice_amount, discount, added, product, addedDate, addedTime }) => {
   return (
     <>
 
@@ -12,9 +12,9 @@ const Table = ({ kuponi, fatura, zbritja }) => {
         </TouchableOpacity>
 
         <View style={{ flexDirection: 'row' }}>
-          <Text style={{ paddingHorizontal: 10, marginVertical: 5 }}>14:48:65</Text>
+          <Text style={{ paddingHorizontal: 10, marginVertical: 5 }}>{addedTime}</Text>{/*time from the added prop*/}
           <Text style={{ color: '#f40000ff', marginVertical: 5 }}>|</Text>
-          <Text style={{ paddingHorizontal: 10, marginVertical: 5 }}>2025-06-03</Text>
+          <Text style={{ paddingHorizontal: 10, marginVertical: 5 }}>{addedDate}</Text>{/*date from the added prop*/}
         </View>
 
       </View>
@@ -26,13 +26,13 @@ const Table = ({ kuponi, fatura, zbritja }) => {
           <Text style={styles.line}>Zbritja</Text>
         </View>
         <View style={[styles.line2, styles.lines]}>
-          <Text style={styles.line}>{kuponi}</Text>
-          <Text style={styles.line}>{fatura}</Text>
-          <Text style={styles.line}>{zbritja}</Text>
+          <Text style={styles.line}>{coupon}</Text>
+          <Text style={styles.line}>{invoice_amount}</Text>
+          <Text style={styles.line}>{discount}</Text>
         </View>
         <View style={[styles.line3]}>
           <Image source={require('../assets/icons/sm_produkti.png')} style={styles.icon} />
-          <Text style={{ marginTop: 5, color: '#f00505ff' }}>Liber/Reviste/Novel, etj</Text>
+          <Text style={{ marginTop: 5, color: '#f00505ff' }}>{product}</Text>
         </View>
       </View>
     </>

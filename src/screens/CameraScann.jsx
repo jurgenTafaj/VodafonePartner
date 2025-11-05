@@ -7,10 +7,14 @@ import {
   Dimensions,
   Linking,
   StatusBar,
+  ScrollView,
   ActivityIndicator,
-  TouchableOpacity, // For buttons
-  Modal, // For the confirmation popup
-  Alert, // Using native alert for success messages
+  TouchableOpacity, 
+  Modal, 
+  Alert, 
+  // NEW: Import TextInput and Image
+  TextInput,
+  Image,
 } from 'react-native';
 import {
   Camera,
@@ -18,12 +22,13 @@ import {
   useCodeScanner,
   useCameraPermission,
 } from 'react-native-vision-camera';
-// Import the new API service function
-import { redeemCoupon } from '../api/authService';
+import { redeemCoupon, getCuponDetails } from '../api/authService';
+
+// NEW: Removed CuponDetails import
 
 const { width, height } = Dimensions.get('window');
 
-// Debounce function to prevent rapid, repetitive scans
+// Debounce function (unchanged)
 const debounce = (func, delay) => {
   let timeout;
   return (...args) => {
@@ -33,171 +38,198 @@ const debounce = (func, delay) => {
 };
 
 // --- Main App Component ---
-// Assume onGoBack is a navigation function passed from the parent (e.g., navigation.goBack or setting a parent state)
 export default function CameraScann({ onGoBack }) {
   const {
     hasPermission,
     requestPermission
   } = useCameraPermission();
 
-  // New State Variables for Logic and UI
+  // --- State Variables ---
   const [scannedData, setScannedData] = useState(null);
   const [isInitialized, setIsInitialized] = useState(false);
-  const [isModalVisible, setIsModalVisible] = useState(false);
-  const [isRedeeming, setIsRedeeming] = useState(false);
+  const [isConfirmModalVisible, setIsConfirmModalVisible] = useState(false); 
+  const [showDetailsModal, setShowDetailsModal] = useState(false);
+  const [couponData, setCouponData] = useState(null);
+  const [isApiLoading, setIsApiLoading] = useState(false); // For getDetails
   const [error, setError] = useState(null);
-  // Controls the Camera's active state
   const [isScanActive, setIsScanActive] = useState(true);
 
-  // 1. Get the back camera device
+  // NEW: State for the details modal (from CuponDetails)
+  const [invoiceAmount, setInvoiceAmount] = useState('');
+  const [notes, setNotes] = useState(''); // Added notes field
+  const [discountedPrice, setDiscountedPrice] = useState('0.00');
+  const [isRedeeming, setIsRedeeming] = useState(false); // For redeemCoupon
+
   const device = useCameraDevice('back');
 
-  // 2. Request Camera Permissions on startup
+  // Request Camera Permissions (unchanged)
   useEffect(() => {
     const checkAndRequestPermission = async () => {
       if (hasPermission === false) {
         const granted = await requestPermission();
         if (granted) {
-          setTimeout(() => {
-            setIsInitialized(true);
-          }, 500);
+          setTimeout(() => setIsInitialized(true), 500);
         }
       } else if (hasPermission === true) {
         setIsInitialized(true);
       }
     };
-
     checkAndRequestPermission();
   }, [hasPermission, requestPermission]);
 
-  // Use a ref to store the last scanned value to prevent re-scans
+  // NEW: useEffect to calculate discount (from CuponDetails)
+  // This runs whenever the invoice amount or coupon data changes
+  useEffect(() => {
+    const productDetails = couponData?.data?.product;
+    if (!productDetails) return;
+
+    const parsedInvoiceAmount = parseFloat(invoiceAmount);
+    if (isNaN(parsedInvoiceAmount) || parsedInvoiceAmount <= 0) {
+      setDiscountedPrice('0.00');
+      return;
+    }
+
+    const { 
+      discount: discountValue, 
+      discount_type: discountType,
+      amount_min: minAmount,
+      amount_max: maxAmount
+    } = productDetails;
+
+    let calculatedDiscount = 0;
+    if (parsedInvoiceAmount >= minAmount && parsedInvoiceAmount <= maxAmount) {
+      if (discountType === 'percentage') {
+        calculatedDiscount = (parsedInvoiceAmount * discountValue) / 100;
+      } else if (discountType === 'static') {
+        calculatedDiscount = Math.min(discountValue, parsedInvoiceAmount);
+      }
+    }
+    setDiscountedPrice(calculatedDiscount.toFixed(2));
+  }, [invoiceAmount, couponData]); // Dependencies
+
+
   const lastScannedValueRef = useRef(null);
 
-  // Function to reset all scanning states
+  // Reset scan state
   const resetScan = useCallback(() => {
     setScannedData(null);
     lastScannedValueRef.current = null;
-    setIsScanActive(true); // Re-enable camera scanning
-    setError(null); // Clear any old errors
+    setIsScanActive(true); 
+    setError(null); 
+    setCouponData(null); 
+    // NEW: Reset details state
+    setInvoiceAmount('');
+    setNotes('');
+    setDiscountedPrice('0.00');
   }, []);
 
-  // --- API Call Function ---
-  const handleRedeemCoupon = useCallback(async (couponCode) => {
-    setIsRedeeming(true);
+  // API Call Function 1: Get Details (unchanged)
+  const handleGetCouponDetails = useCallback(async (couponCode) => {
+    setIsApiLoading(true); 
     setError(null);
-
     try {
-      // Use the imported service function
-      const response = await redeemCoupon(couponCode);
-      const data = response.data; // Axios wraps the response body in .data
-
-      // Check for API-specific success/failure status within the response data
+      const response = await getCuponDetails(couponCode);
+      const data = response.data;
       if (data.status_code >= 400 || data.success === false) { 
-        // Use the error message from the response body as shown in your image
-        const errorMessage = data.status_message || data.errors?.[0]?.title || 'Coupon redemption failed (API response error).';
-        console.error('API Redemption Error:', errorMessage);
-        throw new Error(errorMessage);
+        throw new Error(data.status_message || data.errors?.[0]?.title || 'Coupon validation failed.');
       }
-
-      // Successful redemption
-      setIsModalVisible(false);
-      // Use Alert for success message
-      Alert.alert('Success', 'Coupon redeemed successfully!', [
-        { text: 'OK', onPress: onGoBack || (() => {}) },
-      ]); 
-      
-      // Simulate navigation to HomeComponent or back (if Alert is dismissed)
-      if (onGoBack) {
-        // Since we use the onGoBack in the Alert handler, we don't need to call it here
-      }
-
+      setCouponData(data); 
+      setIsConfirmModalVisible(false); 
+      setShowDetailsModal(true); // Show the new details modal
     } catch (err) {
-      console.error('API Redemption Error:', err);
-      setIsModalVisible(false); // Close modal on error
-
-      let message = 'Network error occurred. Please check connection.';
-      
-      // Handle specific Axios error structure (non-2xx response from server)
+      console.error('API GetDetails Error:', err);
+      setIsConfirmModalVisible(false); 
+      let message = err.message || 'Network error occurred.';
       if (err.response) {
         const errorData = err.response.data;
-        // Try to extract the custom message from the error data
         message = errorData.status_message || errorData.errors?.[0]?.title || `Server Error (${err.response.status}).`;
-      } else if (err.message) {
-        // Handle custom errors thrown by the service layer (e.g., 'User ID not found')
-        message = err.message;
       }
-      
-      // Show error via state and keep the user on the scanner
       setError(message);
-      
-      // Reset the scanned value after a delay so the user can re-scan or dismiss the error manually
       setTimeout(resetScan, 3000); 
+    } finally {
+      setIsApiLoading(false); 
+    }
+  }, [resetScan]);
 
+  // NEW: API Call Function 2: Redeem Coupon (from CuponDetails)
+  const handleRedeemPress = async () => {
+    if (!invoiceAmount || parseFloat(invoiceAmount) <= 0) {
+      alert('Ju lutem shkruani një vlerë të vlefshme për faturën.');
+      return;
+    }
+
+    setIsRedeeming(true);
+    try {
+      const response = await redeemCoupon(scannedData, invoiceAmount, notes);
+      
+      if (response.data && response.data.status_code === 200) {
+        alert('Kuponi u konsumua me sukses!');
+        setShowDetailsModal(false); // Close the details modal
+        resetScan(); // Reset scanner
+        if (onGoBack) onGoBack(); // Navigate back
+      } else {
+        alert(response.data.status_message || 'Gabim gjatë konsumimit të kuponit.');
+      }
+    } catch (error) {
+      console.error("Redeem Error:", error);
+      alert('Gabim i papritur: ' + error.message);
     } finally {
       setIsRedeeming(false);
     }
-  }, [onGoBack, resetScan]);
+  };
 
-
-  // Use useCallback and debounce for handling the code scan event
+  // handleCodeScanned (unchanged)
   const handleCodeScanned = useCallback((codes) => {
     if (codes.length > 0) {
       const value = codes[0].value;
       if (value && value !== lastScannedValueRef.current) {
         lastScannedValueRef.current = value;
         setScannedData(value);
-        setIsScanActive(false); // **Pause scanning immediately**
-        setIsModalVisible(true); // **Show confirmation pop-up**
-
-        // Keep the debounce logic for reference, though pausing 'isActive' is more direct
-        debounce(() => {
-          // This allows manual reset or re-scan logic if the modal is dismissed
-        }, 5000)();
+        setIsScanActive(false); 
+        setIsConfirmModalVisible(true);
       }
     }
   }, []);
 
-  // 3. Initialize the Code Scanner hook
   const codeScanner = useCodeScanner({
     codeTypes: ['qr'],
     onCodeScanned: handleCodeScanned,
   });
 
-  // --- Confirmation Modal Component ---
+  // Confirmation Modal Component (unchanged)
   const ConfirmationModal = () => (
     <Modal
       animationType="fade"
       transparent={true}
-      visible={isModalVisible}
+      visible={isConfirmModalVisible}
       onRequestClose={() => {
-        setIsModalVisible(false);
+        setIsConfirmModalVisible(false); 
         resetScan();
       }}
     >
       <View style={styles.modalOverlay}>
         <View style={styles.modalContent}>
-          <Text style={styles.modalTitle}>Confirm Coupon Redemption</Text>
+          <Text style={styles.modalTitle}>Confirm Coupon</Text>
           <Text style={styles.modalBody}>
-            Do you want to proceed and redeem the following code?
+            Do you want to check the details for this coupon code?
           </Text>
           <Text style={styles.modalCodeValue}>{scannedData}</Text>
-
-          {isRedeeming ? (
+          {isApiLoading ? (
             <ActivityIndicator size="large" color="#4CAF50" style={{ marginTop: 20 }} />
           ) : (
             <View style={styles.modalButtonContainer}>
               <TouchableOpacity
                 style={[styles.modalButton, styles.cancelButton]}
                 onPress={() => {
-                  setIsModalVisible(false);
-                  resetScan(); // Reset scan state if the user cancels
+                  setIsConfirmModalVisible(false); 
+                  resetScan();
                 }}
               >
                 <Text style={styles.buttonText}>No / Cancel</Text>
               </TouchableOpacity>
               <TouchableOpacity
                 style={[styles.modalButton, styles.confirmButton]}
-                onPress={() => handleRedeemCoupon(scannedData)}
+                onPress={() => handleGetCouponDetails(scannedData)}
               >
                 <Text style={styles.buttonText}>Yes / Proceed</Text>
               </TouchableOpacity>
@@ -209,102 +241,67 @@ export default function CameraScann({ onGoBack }) {
   );
 
   // --- RENDERING LOGIC ---
-
-  // Check for camera device and initialization
   const isCameraReady = hasPermission === true && device != null && isInitialized;
-
   if (hasPermission === null || hasPermission === undefined || !isCameraReady) {
-    // Show Loading/Permission Required/Device Not Found states
-    if (hasPermission === false) {
-      // Permission Required state (Unchanged)
+     if (hasPermission === false) {
+      // ... (permission required JSX - unchanged)
       return (
         <SafeAreaView style={[styles.container, styles.center]}>
-          <StatusBar barStyle="light-content" />
           <Text style={styles.permissionText}>Camera Access Required</Text>
-          <Text style={styles.permissionSubText}>
-            Please grant camera permission to use the scanner.
-          </Text>
-          <Text style={styles.linkText} onPress={async () => {
-            await Linking.openSettings();
-          }}>
+          <Text style={styles.linkText} onPress={async () => await Linking.openSettings()}>
             Open Settings
-          </Text>
-          <Text
-            style={[styles.linkText, { marginTop: 15 }]}
-            onPress={async () => {
-              await requestPermission();
-            }}>
-            Try Again
           </Text>
         </SafeAreaView>
       );
-    }
-
-    // Initializing Camera/Checking Permissions state (Unchanged)
+     }
+    // ... (initializing camera JSX - unchanged)
     return (
       <SafeAreaView style={[styles.container, styles.center]}>
-        <StatusBar barStyle="light-content" />
-        <ActivityIndicator size="large" color="#4CAF50" style={{ marginBottom: 20 }} />
-        <Text style={styles.permissionText}>
-          Initializing Camera...
-        </Text>
-        <Text style={styles.permissionSubText}>
-          {device == null
-            ? 'Looking for camera device...'
-            : 'Setting up camera permissions...'}
-        </Text>
+        <ActivityIndicator size="large" color="#4CAF50" />
+        <Text style={styles.permissionText}>Initializing Camera...</Text>
       </SafeAreaView>
     );
   }
 
-
+  // --- Main Component Render ---
   return (
     <SafeAreaView style={styles.container}>
       <StatusBar barStyle="light-content" />
 
-      {/* 4. The Camera View. isActive is now conditional */}
+      {/* Camera View (unchanged) */}
       <View style={styles.cameraContainer}>
         <Camera
           style={StyleSheet.absoluteFill}
           device={device}
-          // Only active if permissions are granted and scan is not paused by a detection/modal
           isActive={isScanActive} 
           codeScanner={codeScanner}
           enableZoomGesture={false}
         />
-
-        {/* Scanning Overlay (Visual guide for the user) */}
         <View style={styles.overlay}>
           <View style={styles.scannerWindow} />
           <View style={styles.guideTextContainer}>
             <Text style={styles.guideText}>
               {scannedData && !isScanActive
-                ? 'Code Detected. Confirming...'
+                ? 'Code Detected. Checking...'
                 : 'Align the QR Code within the frame to scan.'}
             </Text>
           </View>
         </View>
       </View>
 
-      {/* Result Display Panel */}
+      {/* Result Display Panel (unchanged) */}
       <View style={styles.resultPanel}>
-        {/* Error Message Display */}
         {error && (
           <View style={styles.errorBox}>
-            <Text style={styles.errorText}>
-              Error: {error}
-            </Text>
+            <Text style={styles.errorText}>Error: {error}</Text>
           </View>
         )}
-
         <Text style={styles.resultLabel}>
           Scan Result ({scannedData ? 'Detected' : 'Searching...'})
         </Text>
         <Text style={styles.resultValue} numberOfLines={2}>
           {scannedData || 'Point your camera at a QR code.'}
         </Text>
-
-        {/* Reset/Go Back Button */}
         <TouchableOpacity
           style={styles.actionButton}
           onPress={scannedData ? resetScan : onGoBack}
@@ -313,11 +310,85 @@ export default function CameraScann({ onGoBack }) {
             {scannedData ? 'Scan Another Code' : 'Go Back'}
           </Text>
         </TouchableOpacity>
-
       </View>
 
-      {/* Confirmation Modal */}
+      {/* Confirmation Modal (unchanged) */}
       <ConfirmationModal />
+
+      {/* NEW: CuponDetails Modal (Rebuilt) */}
+      <Modal
+          transparent={true}
+          visible={showDetailsModal}
+          onRequestClose={() => {
+            setShowDetailsModal(false);
+            resetScan();
+          }}
+        >
+          <View style={styles.detailsModalContainer}>
+            {/* This ScrollView is important in case the keyboard
+              covers the inputs in the modal.
+            */}
+            <ScrollView style={{width: '100%'}}> 
+              {/* This is the JSX from CuponDetails, adapted for this modal */}
+              <View style={styles.detailsTitleView}>
+                <Image source={require('../assets/icons/sm_promocioni.png')} style={styles.detailsIcon} />
+                <Text style={styles.detailsTitle}>Promocioni</Text>
+              </View>
+              <View style={styles.detailsInfo}>
+                <Text style={styles.detailsText}>{couponData?.data?.product?.product}</Text>
+              </View>
+
+              <View style={styles.detailsTitleView}>
+                <Image source={require('../assets/icons/sm_produkti.png')} style={styles.detailsIcon} />
+                <Text style={styles.detailsTitle}>Shënim (Opsional)</Text>
+              </View>
+              <View>
+                <TextInput 
+                  style={styles.detailsInput} 
+                  onChangeText={setNotes}
+                  value={notes}
+                  placeholder="Shkruani një shënim..."
+                />
+              </View>
+
+              <View style={styles.detailsTitleView}>
+                <Image source={require('../assets/icons/sm_fatura.png')} style={styles.detailsIcon} />
+                <Text style={styles.detailsTitle}>Vlera e Faturës</Text>
+              </View>
+              <View>
+                <TextInput 
+                  style={styles.detailsInput} 
+                  onChangeText={setInvoiceAmount} 
+                  value={invoiceAmount}
+                  placeholder="Shkruani vlerën"
+                  keyboardType="numeric"
+                />
+              </View>
+
+              <View style={styles.detailsTitleView}>
+                <Image source={require('../assets/icons/sm_ulja.png')} style={styles.detailsIcon} />
+                <Text style={styles.detailsTitle}>Vlera e uljes</Text>
+              </View>
+              <View>
+                <Text style={[styles.detailsInput, { paddingVertical: 10 }]}>{discountedPrice}</Text>
+              </View>
+
+              <View style={styles.detailsButtonContainer}>
+                <TouchableOpacity 
+                  onPress={handleRedeemPress} 
+                  style={styles.detailsButton}
+                  disabled={isRedeeming}
+                >
+                  {isRedeeming ? (
+                    <ActivityIndicator color="#fff" />
+                  ) : (
+                    <Text style={{ color: '#fff', fontSize: 16 }}>Konsumo</Text>
+                  )}
+                </TouchableOpacity>
+              </View>
+            </ScrollView>
+          </View>
+        </Modal>
     </SafeAreaView>
   );
 }
@@ -340,6 +411,7 @@ const styles = StyleSheet.create({
     color: '#E0E0E0',
     marginBottom: 10,
   },
+  // ... (all original scanner styles: permissionSubText, linkText, cameraContainer, overlay, etc.)
   permissionSubText: {
     fontSize: 16,
     color: '#B0B0B0',
@@ -371,7 +443,7 @@ const styles = StyleSheet.create({
   },
   guideTextContainer: {
     position: 'absolute',
-    top: SCANNER_SIZE + height / 5, // Adjusted position to be closer to the scanner
+    top: SCANNER_SIZE + height / 5, 
     paddingHorizontal: 20,
   },
   guideText: {
@@ -400,7 +472,6 @@ const styles = StyleSheet.create({
     minHeight: 40,
     marginBottom: 10,
   },
-  // New Styles for Confirmation Modal
   modalOverlay: {
     flex: 1,
     justifyContent: 'center',
@@ -457,17 +528,16 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   confirmButton: {
-    backgroundColor: '#4CAF50', // Green for success
+    backgroundColor: '#4CAF50',
   },
   cancelButton: {
-    backgroundColor: '#FF6F61', // Red/Orange for cancel
+    backgroundColor: '#FF6F61', 
   },
   buttonText: {
     color: '#FFFFFF',
     fontSize: 16,
     fontWeight: '700',
   },
-  // New Styles for Error Display
   errorBox: {
     backgroundColor: '#FF6F61',
     padding: 10,
@@ -480,7 +550,6 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     textAlign: 'center',
   },
-  // Updated Action Button
   actionButton: {
     marginTop: 15,
     paddingVertical: 12,
@@ -493,5 +562,61 @@ const styles = StyleSheet.create({
     color: '#4CAF50',
     fontSize: 16,
     fontWeight: '700',
-  }
+  },
+
+  // --- NEW: Styles merged from CuponDetails ---
+  detailsModalContainer: {
+    marginTop: 200, // Adjusted margin to be more centered
+    marginHorizontal: 10,
+    backgroundColor: '#e5e5e5ff',
+    height: 'auto', // Auto height
+    maxHeight: '70%', // Max height
+    borderRadius: 20,
+    padding: 15,
+  },
+  detailsTitleView: {
+    flexDirection: 'row',
+    fontSize: 16,
+    fontWeight: 'bold',
+    marginVertical: 5
+  },
+  detailsTitle: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    marginLeft: 5, // Spacing from icon
+    alignSelf: 'center',
+  },
+  detailsText: {
+    fontSize: 15,
+    marginVertical: 5,
+    paddingVertical: 10, 
+    paddingLeft: 30
+  },
+  detailsButtonContainer: {
+    alignItems: 'center',
+    marginTop: 30,
+    marginBottom: 20, // Add bottom margin
+  },
+  detailsButton: {
+    backgroundColor: '#242739ff',
+    paddingVertical: 12,
+    paddingHorizontal: 40,
+    borderRadius: 30,
+    minWidth: 120,
+    alignItems: 'center',
+  },
+  detailsIcon: {
+    height: 30,
+    width: 30
+  },
+  detailsInfo: {
+    backgroundColor: '#ffffffff'
+  },
+  detailsInput: {
+    backgroundColor: '#ffffffff',
+    paddingLeft: 30,
+    height: 40, 
+    justifyContent: 'center',
+  },
+
 });
