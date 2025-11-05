@@ -26,7 +26,7 @@ export default function InfoScreen() {
   return (
     <>
       <HeaderImage text1="PERDORUESI" text2="adrionadmin" imageURL="notHome" />
-      <View style={{ flex: 1, marginTop: -420 }}>
+      <View style={{ flex: 1 }}>
         <ScrollView styles={styles.scrollView}>
 
           <View style={{ flexDirection: 'row', marginHorizontal: 15 }}>
