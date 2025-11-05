@@ -44,11 +44,10 @@ const MeInputButton = ({ visible, onClose }) => {
     }
   };
 
-
   return (
     <Modal transparent={true}
       visible={visible} onRequestClose={onClose} >
-      <View style={{ marginTop: 280, backgroundColor: '#e5e5e5ff', height: 350 }}>
+      <View style={{ backgroundColor: '#e5e5e5ff', height: 570, paddingTop: 100, marginTop: 150 }}>
         {showDetails ? (
           // 👇 When coupon is redeemed, show the CuponDetails component
           <CuponDetails
@@ -65,11 +64,11 @@ const MeInputButton = ({ visible, onClose }) => {
               <Image source={require('../assets/icons/input_icon.png')} style={styles.icon} />
               <Text style={{ fontSize: 15, paddingTop: 20 }}>Shkruaj kodin e kuponit</Text>
               <View style={{ paddingVertical: 10 }}>
-                <TextInput 
-                  value={inputvalue} 
+                <TextInput
+                  value={inputvalue}
                   maxLength={16}
-                  onChangeText={handleChangeText} 
-                  style={{backgroundColor: '#ffffffff', width: 300, borderRadius: 20, fontSize: 15, textAlign: 'center'}} 
+                  onChangeText={handleChangeText}
+                  style={{ backgroundColor: '#ffffffff', width: 300, borderRadius: 20, fontSize: 15, textAlign: 'center' }}
                   keyboardType="numeric" />
               </View>
             </View>

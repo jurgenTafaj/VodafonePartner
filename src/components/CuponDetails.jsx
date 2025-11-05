@@ -6,9 +6,9 @@ import HeaderImage from './HeaderImage';
 const CuponDetails = ({ onClose, product }) => {
 
   const [value, setValue] = useState(''); // This is the Invoice Amount
-  
+
   // NEW: Changed default to '0.00' for better display
-  const [discountedPrice, setDiscountedPrice] = useState('0.00'); 
+  const [discountedPrice, setDiscountedPrice] = useState('0.00');
 
   console.log(JSON.stringify(product));
 
@@ -21,7 +21,7 @@ const CuponDetails = ({ onClose, product }) => {
     }
 
     const invoiceAmount = parseFloat(value);
-    
+
     // Check if the input is a valid number
     if (isNaN(invoiceAmount) || invoiceAmount <= 0) {
       setDiscountedPrice('0.00'); // Reset if input is empty or invalid
@@ -29,8 +29,8 @@ const CuponDetails = ({ onClose, product }) => {
     }
 
     // Get discount rules from the product prop
-    const { 
-      discount: discountValue, 
+    const {
+      discount: discountValue,
       discount_type: discountType,
       amount_min: minAmount,
       amount_max: maxAmount
@@ -40,7 +40,7 @@ const CuponDetails = ({ onClose, product }) => {
 
     // Check if the invoice amount is within the valid range for the coupon
     if (invoiceAmount >= minAmount && invoiceAmount <= maxAmount) {
-      
+
       if (discountType === 'percentage') {
         // --- Percentage Logic ---
         calculatedDiscount = (invoiceAmount * discountValue) / 100;
@@ -48,10 +48,10 @@ const CuponDetails = ({ onClose, product }) => {
       } else if (discountType === 'static') {
         // --- Static Logic ---
         // The discount cannot be more than the invoice amount itself
-        calculatedDiscount = Math.min(discountValue, invoiceAmount); 
+        calculatedDiscount = Math.min(discountValue, invoiceAmount);
       }
     }
-    
+
     // Update the state, formatted to 2 decimal places
     setDiscountedPrice(calculatedDiscount.toFixed(2));
 
@@ -60,11 +60,7 @@ const CuponDetails = ({ onClose, product }) => {
 
   return (
     <>
-      <View style={{ flex: 1, height: '100%', marginVertical: -335 }}>
-        <HeaderImage text1="KUPONI" text2="11233897" imageURL="cupon" />
-      </View>
-
-      <View>
+      <View style={{ paddingTop: -100 }}>
         <View style={styles.title}>
           <Image source={require('../assets/icons/sm_promocioni.png')} style={styles.icon} />
           <Text style={styles.title}>Promocioni</Text>
@@ -90,9 +86,9 @@ const CuponDetails = ({ onClose, product }) => {
 
         <View>
           {/* MODIFIED: Added props for better UX */}
-          <TextInput 
-            style={styles.input} 
-            onChangeText={setValue} 
+          <TextInput
+            style={styles.input}
+            onChangeText={setValue}
             value={value}
             placeholder="Shkruani vlerën"
             keyboardType="numeric" // Ensures user sees number pad
@@ -115,7 +111,7 @@ const CuponDetails = ({ onClose, product }) => {
             <Text style={{ color: '#fff', fontSize: 16 }}>Konsumo</Text>
           </TouchableOpacity>
         </View>
-      </View >
+      </View>
     </>
   );
 };
@@ -154,7 +150,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#ffffffff',
     paddingLeft: 30,
     // NEW: Add height for consistency
-    height: 40, 
+    height: 40,
     justifyContent: 'center',
   },
   text: {
