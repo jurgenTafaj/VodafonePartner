@@ -40,6 +40,7 @@ export default function BottomTab() {
       >
 
         <Tab.Screen name="Home" component={HomeScreen} options={{
+
           tabBarIcon: ({ focused }) => (
             <Image 
               source={require('../assets/icons/menu_home.png')} 

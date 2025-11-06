@@ -1,24 +1,24 @@
 import React, { useState, useEffect } from 'react';
-import { 
-  View, 
-  Text, 
-  TouchableOpacity, 
-  StyleSheet, 
-  Image, 
-  TextInput,
-  ActivityIndicator,
-  Alert
-} from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet, Image, TextInput,useWindowDimensions, ActivityIndicator, Alert } from 'react-native';
+import { redeemCoupon } from '../api/authService';
+import HeaderImage from './HeaderImage';
+import { useNavigation } from '@react-navigation/native';
 
 // Import your service. Adjust the path as necessary.
-import { redeemCoupon } from '../api/authService';
 const CuponDetails = ({ onClose, product, couponCode, setInputValue }) => {
+
 
   const [value, setValue] = useState(''); // Invoice Amount
   const [discountedPrice, setDiscountedPrice] = useState('0.00');
   const [notes, setNotes] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
+
+  const navigation = useNavigation();
+
+  // NEW: Changed default to '0.00' for better display
+  const [discountedPrice, setDiscountedPrice] = useState('0.00');
+  const { width } = useWindowDimensions();
 
   console.log('couponCode received product:', couponCode);
   // This useEffect for local discount calculation remains unchanged
@@ -133,85 +133,67 @@ const CuponDetails = ({ onClose, product, couponCode, setInputValue }) => {
   };
   // --- END OF MODIFIED FUNCTION ---
 
-
   return (
-    <>
-      <View style={{ paddingTop: -100 }}>
-        <View style={styles.title}>
-          <Image source={require('../assets/icons/sm_promocioni.png')} style={styles.icon} />
-          <Text style={styles.title}>Promocioni</Text>
-        </View>
 
-        <View style={styles.info}>
-          <Text style={styles.text}>{product?.data?.product?.product}</Text>
-        </View>
+    <View style={[styles.container, { width }]}>
 
-        <View style={styles.title}>
-          <Image source={require('../assets/icons/sm_produkti.png')} style={styles.icon} />
-          <Text style={styles.title}>Produkti</Text>
-        </View>
-
-        <View>
-          <TextInput
-            style={styles.input}
-            onChangeText={setNotes}
-            value={notes}
-            placeholder="Shënim (opsional)"
-          />
-        </View>
-
-        <View style={styles.title}>
-          <Image source={require('../assets/icons/sm_fatura.png')} style={styles.icon} />
-          <Text style={styles.title}>Vlera e Faturës</Text>
-        </View>
-
-        <View>
-          <TextInput
-            style={styles.input}
-            onChangeText={setValue}
-            value={value}
-            placeholder="Shkruani vlerën"
-            keyboardType="numeric"
-          />
-        </View>
-
-        <View style={styles.title}>
-          <Image source={require('../assets/icons/sm_ulja.png')} style={styles.icon} />
-          <Text style={styles.title}>Vlera e uljes</Text>
-        </View>
-
-        <View>
-          <Text style={[styles.input, { paddingVertical: 10 }]}>{discountedPrice}</Text>
-        </View>
-
-        {error && (
-          <Text style={styles.errorText}>{error}</Text>
-        )}
-
-        <View style={styles.container}>
-          <TouchableOpacity 
-            onPress={handleRedeem} 
-            style={[styles.button, isLoading && styles.buttonDisabled]}
-            disabled={isLoading}
-          >
-            {isLoading ? (
-              <ActivityIndicator size="small" color="#fff" />
-            ) : (
-              <Text style={{ color: '#fff', fontSize: 16 }}>Konsumo</Text>
-            )}
-          </TouchableOpacity>
-        </View>
+      <View style={styles.title}>
+        <Image source={require('../assets/icons/sm_promocioni.png')} style={styles.icon} />
+        <Text style={styles.title}>Promocioni</Text>
       </View>
-    </>
+
+      <View style={styles.info}>
+        <Text style={styles.text}>{product?.data?.product?.product}</Text>
+      </View>
+
+      <View style={styles.title}>
+        <Image source={require('../assets/icons/sm_produkti.png')} style={styles.icon} />
+        <Text style={styles.title}>Produkti</Text>
+      </View>
+
+      <View>
+        <TextInput style={styles.input} 
+          onChangeText={setNotes}
+          value={notes}
+          placeholder="Shënim (opsional)"
+        />
+      </View>
+
+      <View style={styles.title}>
+        <Image source={require('../assets/icons/sm_fatura.png')} style={styles.icon} />
+        <Text style={styles.title}>Vlera e Faturës</Text>
+      </View>
+
+      <View>
+        <TextInput
+          style={styles.input}
+          onChangeText={setValue}
+          value={value}
+          placeholder="Shkruani vlerën"
+          keyboardType="numeric"
+        />
+      </View>
+
+      <View style={styles.title}>
+        <Image source={require('../assets/icons/sm_ulja.png')} style={styles.icon} />
+        <Text style={styles.title}>Vlera e uljes</Text>
+      </View>
+
+      <View>
+        <Text style={[styles.input]}>{discountedPrice}</Text>
+      </View>
+
+      <View style={styles.buttonContainer}>
+        <TouchableOpacity style={styles.button} onPress={() => { onClose(); navigation.navigate('Home') }}>
+          <Text style={{ color: '#fff', fontSize: 16, textAlign: 'center' }}>Konsumo</Text>
+        </TouchableOpacity>
+      </View>
+    </View>
+
   );
 };
 
-// Styles (unchanged from previous answer)
 const styles = StyleSheet.create({
-  container: {
-    alignItems: 'center',
-    marginTop: 30,
-  },
   title: {
     flexDirection: 'row',
     fontSize: 16,
@@ -235,6 +217,8 @@ const styles = StyleSheet.create({
   },
   buttonDisabled: {
     backgroundColor: '#999',
+    marginBottom: 200,
+    marginHorizontal: 120
   },
   icon: {
     height: 30,
@@ -256,6 +240,21 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: 'bold'
   }
+  text: {
+    paddingVertical: 10, paddingLeft: 30
+  },
+
+  container: {
+    //height: 600,
+    //zIndex: 1,
+    position: 'absolute',
+    backgroundColor: '#e5e5e5ff',
+    //marginTop: 220,
+    //paddingVertical: 60,
+
+  },
+
+
 });
 
 export default CuponDetails;
