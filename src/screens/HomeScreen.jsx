@@ -9,6 +9,7 @@ export default function HomeScreen() {
   const navigation = useNavigation();
 
   const [showComponent, setShowComponent] = useState(false);
+  const [showDetails, setShowDetails] = useState(false);
 
   return (
     <View style={{ flex: 1, backgroundColor: '#e5e5e5ff' }}>
@@ -31,7 +32,10 @@ export default function HomeScreen() {
         </View>
 
         <View>
-          <TouchableOpacity style={{ marginRight: 20, marginTop: -250 }} onPress={() => setShowComponent(true)}>
+          <TouchableOpacity style={{ marginRight: 20, marginTop: -250 }} onPress={() => {
+            setShowComponent(true)
+            setShowDetails(false);
+            }}>
             <ImageBackground
               source={require('../assets/pictures/button_input.png')}
               style={{ width: 140, height: 50 }}  //hoqa flex 1 nga ky stilizim

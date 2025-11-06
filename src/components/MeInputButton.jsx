@@ -253,8 +253,10 @@ import React, { useState } from 'react';
 import { View, Text, TouchableOpacity, Image, StyleSheet, TextInput, ActivityIndicator, useWindowDimensions } from 'react-native';
 import { getCuponDetails } from '../api/authService';
 import CuponDetails from './CuponDetails'
+const MeInputButton = ({ visible, onClose, showDetails, setShowDetails }) => {
 
-const MeInputButton = ({ onClose }) => {
+
+  const [reedem, setReedem] = useState(false);
 
   const { width } = useWindowDimensions();
 
