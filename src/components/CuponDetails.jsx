@@ -9,7 +9,6 @@ const CuponDetails = ({ onClose, product, couponCode, setInputValue }) => {
 
 
   const [value, setValue] = useState(''); // Invoice Amount
-  const [discountedPrice, setDiscountedPrice] = useState('0.00');
   const [notes, setNotes] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -239,7 +238,7 @@ const styles = StyleSheet.create({
     marginTop: 15,
     fontSize: 14,
     fontWeight: 'bold'
-  }
+  },
   text: {
     paddingVertical: 10, paddingLeft: 30
   },

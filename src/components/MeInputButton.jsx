@@ -253,7 +253,7 @@ import React, { useState } from 'react';
 import { View, Text, TouchableOpacity, Image, StyleSheet, TextInput, ActivityIndicator, useWindowDimensions } from 'react-native';
 import { getCuponDetails } from '../api/authService';
 import CuponDetails from './CuponDetails'
-const MeInputButton = ({ visible, onClose, showDetails, setShowDetails }) => {
+const MeInputButton = ({ visible, onClose }) => {
 
 
   const [reedem, setReedem] = useState(false);
@@ -318,7 +318,7 @@ const MeInputButton = ({ visible, onClose, showDetails, setShowDetails }) => {
       ) : (
         <View style={{ marginTop: 150, marginHorizontal: 100 }}>
           <TouchableOpacity style={styles.button} onPress={handleRedeem}>
-            <Text style={{ color: '#fff', fontSize: 18, textAlign: 'center' }}>Dërgo</Text>
+            <Text style={{ color: '#fff', fontSize: 18, textAlign: 'center' }}>Dërgggo</Text>
           </TouchableOpacity>
         </View>
       )}
