@@ -13,7 +13,7 @@ const Tab = createBottomTabNavigator();
 
 export default function BottomTab() {
   return (
-    <SafeAreaView style={{ flex: 1 }} edges={['bottom']}>
+    <SafeAreaView style={{ flex: 1, zIndex: 1 }} edges={['bottom']}>
       <Tab.Navigator screenOptions={{
         headerShown: false,
         tabBarShowLabel: false,
@@ -26,6 +26,7 @@ export default function BottomTab() {
       }}>
 
         <Tab.Screen name="Home" component={HomeScreen} options={{
+
           tabBarIcon: ({ focused }) => (
             <View
               style={[
@@ -89,13 +90,12 @@ export default function BottomTab() {
 
 const styles = StyleSheet.create({
   tabButton: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-    alignItems: 'center',
-    justifyContent: 'center',
-    height: '100%',
-    width: '100%',
+    //flex: 1,
+    //alignItems: 'center',
+    //justifyContent: 'center',
+    //alignItems: 'center',
+    //justifyContent: 'center',
+
 
   },
   icon: {

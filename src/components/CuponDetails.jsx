@@ -1,14 +1,17 @@
 import React, { useState, useEffect } from 'react'; // NEW: Added useEffect
-import { View, Text, TouchableOpacity, StyleSheet, Image, TextInput } from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet, Image, TextInput, useWindowDimensions } from 'react-native';
 import HeaderImage from './HeaderImage';
+import { useNavigation } from '@react-navigation/native';
 
+//hoqa onClose nga props
+const CuponDetails = ({ product, onClose }) => {
 
-const CuponDetails = ({ onClose, product }) => {
-
+  const navigation = useNavigation();
   const [value, setValue] = useState(''); // This is the Invoice Amount
 
   // NEW: Changed default to '0.00' for better display
   const [discountedPrice, setDiscountedPrice] = useState('0.00');
+  const { width } = useWindowDimensions();
 
   console.log(JSON.stringify(product));
 
@@ -57,70 +60,64 @@ const CuponDetails = ({ onClose, product }) => {
 
   }, [value, product]); // Re-run this logic whenever 'value' or 'product' changes
 
-
   return (
-    <>
-      <View style={{ paddingTop: -100 }}>
-        <View style={styles.title}>
-          <Image source={require('../assets/icons/sm_promocioni.png')} style={styles.icon} />
-          <Text style={styles.title}>Promocioni</Text>
-        </View>
 
-        <View style={styles.info}>
-          <Text style={styles.text}>{product?.data?.product?.product}</Text>
-        </View>
+    <View style={[styles.container, { width }]}>
 
-        <View style={styles.title}>
-          <Image source={require('../assets/icons/sm_produkti.png')} style={styles.icon} />
-          <Text style={styles.title}>Produkti</Text>
-        </View>
-
-        <View>
-          <TextInput style={styles.input} />
-        </View>
-
-        <View style={styles.title}>
-          <Image source={require('../assets/icons/sm_fatura.png')} style={styles.icon} />
-          <Text style={styles.title}>Vlera e Faturës</Text>
-        </View>
-
-        <View>
-          {/* MODIFIED: Added props for better UX */}
-          <TextInput
-            style={styles.input}
-            onChangeText={setValue}
-            value={value}
-            placeholder="Shkruani vlerën"
-            keyboardType="numeric" // Ensures user sees number pad
-          />
-        </View>
-
-        <View style={styles.title}>
-          <Image source={require('../assets/icons/sm_ulja.png')} style={styles.icon} />
-          <Text style={styles.title}>Vlera e uljes</Text>
-        </View>
-
-
-        <View>
-          {/* This Text now updates automatically */}
-          <Text style={[styles.input, { paddingVertical: 10 }]}>{discountedPrice}</Text>
-        </View>
-
-        <View style={styles.container}>
-          <TouchableOpacity onPress={onClose} style={styles.button}>
-            <Text style={{ color: '#fff', fontSize: 16 }}>Konsumo</Text>
-          </TouchableOpacity>
-        </View>
+      <View style={styles.title}>
+        <Image source={require('../assets/icons/sm_promocioni.png')} style={styles.icon} />
+        <Text style={styles.title}>Promocioni</Text>
       </View>
-    </>
+
+      <View style={styles.info}>
+        <Text style={styles.text}>{product?.data?.product?.product}</Text>
+      </View>
+
+      <View style={styles.title}>
+        <Image source={require('../assets/icons/sm_produkti.png')} style={styles.icon} />
+        <Text style={styles.title}>Produkti</Text>
+      </View>
+
+      <View>
+        <TextInput style={styles.input} />
+      </View>
+
+      <View style={styles.title}>
+        <Image source={require('../assets/icons/sm_fatura.png')} style={styles.icon} />
+        <Text style={styles.title}>Vlera e Faturës</Text>
+      </View>
+
+      <View>
+        <TextInput
+          style={styles.input}
+          onChangeText={setValue}
+          value={value}
+          placeholder="Shkruani vlerën"
+          keyboardType="numeric"
+        />
+      </View>
+
+      <View style={styles.title}>
+        <Image source={require('../assets/icons/sm_ulja.png')} style={styles.icon} />
+        <Text style={styles.title}>Vlera e uljes</Text>
+      </View>
+
+      <View>
+        <Text style={[styles.input]}>{discountedPrice}</Text>
+      </View>
+
+      <View style={styles.buttonContainer}>
+        <TouchableOpacity style={styles.button} onPress={() => { onClose(); navigation.navigate('Home') }}>
+          <Text style={{ color: '#fff', fontSize: 16, textAlign: 'center' }}>Konsumo</Text>
+        </TouchableOpacity>
+      </View>
+    </View>
+
   );
 };
 
+
 const styles = StyleSheet.create({
-  container: {
-    alignItems: 'center',
-    marginTop: 30,
-  },
   title: {
     flexDirection: 'row',
     fontSize: 16,
@@ -138,6 +135,8 @@ const styles = StyleSheet.create({
     paddingVertical: 12,
     paddingHorizontal: 40,
     borderRadius: 30,
+    marginBottom: 200,
+    marginHorizontal: 120
   },
   icon: {
     height: 30,
@@ -149,13 +148,24 @@ const styles = StyleSheet.create({
   input: {
     backgroundColor: '#ffffffff',
     paddingLeft: 30,
-    // NEW: Add height for consistency
     height: 40,
     justifyContent: 'center',
   },
   text: {
     paddingVertical: 10, paddingLeft: 30
-  }
+  },
+
+  container: {
+    //height: 600,
+    //zIndex: 1,
+    position: 'absolute',
+    backgroundColor: '#e5e5e5ff',
+    //marginTop: 220,
+    //paddingVertical: 60,
+
+  },
+
+
 });
 
 export default CuponDetails;
