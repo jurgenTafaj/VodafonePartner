@@ -38,7 +38,7 @@ const HeaderImage = ({ text1, imageURL, text2 }) => {
             <Image source={image[imageURL]} style={styles.imageHeader} />
             <View style={{ paddingTop: 60 }}>
               <Text style={styles.text1}>{text1}</Text>
-              <Text style={styles.text2}>{text1 === "PERDORUESI" ? fullName:'0'}</Text>
+              <Text style={styles.text2}>{text1 === "PERDORUESI" ? fullName:text2}</Text>
               <Image source={{uri:profileImg}} style={styles.logo} />
             </View>
           </View>

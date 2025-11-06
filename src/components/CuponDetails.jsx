@@ -75,19 +75,19 @@ const CuponDetails = ({ onClose, product, couponCode, setInputValue }) => {
         invoiceAmount,
         notes
       );
-      console.log('Redeem coupon response:', response.data);
       // 4. Handle API Response
       // Check for the *specific* success code from your API
       console.log('Response data:', response.data, " ");
       if (response.data.status_code === 200) {
         // --- SUCCESS ---
+        console.log('Coupon redeemed successfully:', );
         setIsLoading(false);
         setInputValue(''); // Clear input field
         // Use the success message from the API
         const successMessage = response.status_message || 'Kuponi u konsumua me sukses.';
         Alert.alert('Sukses!', successMessage);
-        
-        onClose(); // Close the modal
+        onClose(); 
+        navigation.navigate('Home')
 
       } else {
         // --- API-LEVEL ERROR (e.g., status_code 400, 404) ---
@@ -183,7 +183,7 @@ const CuponDetails = ({ onClose, product, couponCode, setInputValue }) => {
       </View>
 
       <View style={styles.buttonContainer}>
-        <TouchableOpacity style={styles.button} onPress={() => { onClose(); navigation.navigate('Home') }}>
+        <TouchableOpacity style={styles.button} onPress={handleRedeem}>
           <Text style={{ color: '#fff', fontSize: 16, textAlign: 'center' }}>Konsumo</Text>
         </TouchableOpacity>
       </View>
