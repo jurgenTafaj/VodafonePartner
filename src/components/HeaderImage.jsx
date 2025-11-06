@@ -28,7 +28,7 @@ const HeaderImage = ({ text1, imageURL, text2 }) => {
   
   return (
     <>
-      <View style={{ flex: 1 }}>
+      <View style={{ flex: 1, zIndex: 10 }}>
         <ImageBackground
           source={require('../assets/pictures/small_wave.png')}
           style={styles.background}

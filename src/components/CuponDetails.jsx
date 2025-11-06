@@ -1,34 +1,37 @@
-import React, { useState, useEffect } from 'react'; // NEW: Added useEffect
-import { View, Text, TouchableOpacity, StyleSheet, Image, TextInput } from 'react-native';
-import HeaderImage from './HeaderImage';
+import React, { useState, useEffect } from 'react';
+import { 
+  View, 
+  Text, 
+  TouchableOpacity, 
+  StyleSheet, 
+  Image, 
+  TextInput,
+  ActivityIndicator,
+  Alert
+} from 'react-native';
 
+// Import your service. Adjust the path as necessary.
+import { redeemCoupon } from '../api/authService';
+const CuponDetails = ({ onClose, product, couponCode, setInputValue }) => {
 
-const CuponDetails = ({ onClose, product }) => {
-
-  const [value, setValue] = useState(''); // This is the Invoice Amount
-
-  // NEW: Changed default to '0.00' for better display
+  const [value, setValue] = useState(''); // Invoice Amount
   const [discountedPrice, setDiscountedPrice] = useState('0.00');
+  const [notes, setNotes] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState(null);
 
-  console.log(JSON.stringify(product));
-
-  // NEW: useEffect hook to calculate the discount
+  console.log('couponCode received product:', couponCode);
+  // This useEffect for local discount calculation remains unchanged
   useEffect(() => {
-    // Get the product details safely
     const productDetails = product?.data?.product;
-    if (!productDetails) {
-      return; // Exit if there's no product data
-    }
+    if (!productDetails) return;
 
     const invoiceAmount = parseFloat(value);
-
-    // Check if the input is a valid number
     if (isNaN(invoiceAmount) || invoiceAmount <= 0) {
-      setDiscountedPrice('0.00'); // Reset if input is empty or invalid
+      setDiscountedPrice('0.00');
       return;
     }
 
-    // Get discount rules from the product prop
     const {
       discount: discountValue,
       discount_type: discountType,
@@ -37,25 +40,98 @@ const CuponDetails = ({ onClose, product }) => {
     } = productDetails;
 
     let calculatedDiscount = 0;
-
-    // Check if the invoice amount is within the valid range for the coupon
     if (invoiceAmount >= minAmount && invoiceAmount <= maxAmount) {
-
       if (discountType === 'percentage') {
-        // --- Percentage Logic ---
         calculatedDiscount = (invoiceAmount * discountValue) / 100;
-
       } else if (discountType === 'static') {
-        // --- Static Logic ---
-        // The discount cannot be more than the invoice amount itself
         calculatedDiscount = Math.min(discountValue, invoiceAmount);
       }
     }
-
-    // Update the state, formatted to 2 decimal places
     setDiscountedPrice(calculatedDiscount.toFixed(2));
+  }, [value, product]);
 
-  }, [value, product]); // Re-run this logic whenever 'value' or 'product' changes
+
+  // --- MODIFIED: This function is now more robust ---
+  const handleRedeem = async () => {
+    const invoiceAmount = parseFloat(value);
+
+    // 1. Validation
+    if (!couponCode) {
+      Alert.alert('Gabim', 'Kodi i kuponit mungon.');
+      return;
+    }
+    if (isNaN(invoiceAmount) || invoiceAmount <= 0) {
+      Alert.alert('Gabim', 'Ju lutem shkruani një vlerë të vlefshme për faturën.');
+      return;
+    }
+
+    // 2. Set loading state
+    setIsLoading(true);
+    setError(null);
+
+    try {
+      // 3. Call the API service
+      const response = await redeemCoupon(
+        couponCode,
+        invoiceAmount,
+        notes
+      );
+      console.log('Redeem coupon response:', response.data);
+      // 4. Handle API Response
+      // Check for the *specific* success code from your API
+      console.log('Response data:', response.data, " ");
+      if (response.data.status_code === 200) {
+        // --- SUCCESS ---
+        setIsLoading(false);
+        setInputValue(''); // Clear input field
+        // Use the success message from the API
+        const successMessage = response.status_message || 'Kuponi u konsumua me sukses.';
+        Alert.alert('Sukses!', successMessage);
+        
+        onClose(); // Close the modal
+
+      } else {
+        // --- API-LEVEL ERROR (e.g., status_code 400, 404) ---
+        // The API call worked, but the business logic failed
+        let apiErrorMessage = 'Ndodhi një gabim i panjohur.'; // Default
+        
+        if (response && response.status_message) {
+          apiErrorMessage = response.status_message;
+        } else if (response && response.errors && response.errors.length > 0) {
+          apiErrorMessage = response.errors[0].title || apiErrorMessage;
+        }
+
+        setIsLoading(false);
+        setError(apiErrorMessage);
+        Alert.alert('Gabim', apiErrorMessage);
+      }
+
+    } catch (err) {
+      // --- 5. Handle NETWORK/SYSTEM Error ---
+      // This catches network failures, server 500s, or JS errors
+      setIsLoading(false);
+      let finalErrorMessage = 'Ndodhi një gabim i panjohur.';
+
+      // Check if this is an error from the API server (like a 404 or 500)
+      if (err.response && err.response.data) {
+        const apiErrorData = err.response.data;
+        if (apiErrorData.status_message) {
+          finalErrorMessage = apiErrorData.status_message;
+        } else if (apiErrorData.errors && apiErrorData.errors.length > 0) {
+          finalErrorMessage = apiErrorData.errors[0].title;
+        } else {
+          finalErrorMessage = err.message; // Fallback
+        }
+      } else {
+        // This is a network error, AsyncStorage error, etc.
+        finalErrorMessage = err.message || 'Ndodhi një gabim në rrjet.';
+      }
+
+      setError(finalErrorMessage);
+      Alert.alert('Gabim', finalErrorMessage);
+    }
+  };
+  // --- END OF MODIFIED FUNCTION ---
 
 
   return (
@@ -76,7 +152,12 @@ const CuponDetails = ({ onClose, product }) => {
         </View>
 
         <View>
-          <TextInput style={styles.input} />
+          <TextInput
+            style={styles.input}
+            onChangeText={setNotes}
+            value={notes}
+            placeholder="Shënim (opsional)"
+          />
         </View>
 
         <View style={styles.title}>
@@ -85,13 +166,12 @@ const CuponDetails = ({ onClose, product }) => {
         </View>
 
         <View>
-          {/* MODIFIED: Added props for better UX */}
           <TextInput
             style={styles.input}
             onChangeText={setValue}
             value={value}
             placeholder="Shkruani vlerën"
-            keyboardType="numeric" // Ensures user sees number pad
+            keyboardType="numeric"
           />
         </View>
 
@@ -100,15 +180,25 @@ const CuponDetails = ({ onClose, product }) => {
           <Text style={styles.title}>Vlera e uljes</Text>
         </View>
 
-
         <View>
-          {/* This Text now updates automatically */}
           <Text style={[styles.input, { paddingVertical: 10 }]}>{discountedPrice}</Text>
         </View>
 
+        {error && (
+          <Text style={styles.errorText}>{error}</Text>
+        )}
+
         <View style={styles.container}>
-          <TouchableOpacity onPress={onClose} style={styles.button}>
-            <Text style={{ color: '#fff', fontSize: 16 }}>Konsumo</Text>
+          <TouchableOpacity 
+            onPress={handleRedeem} 
+            style={[styles.button, isLoading && styles.buttonDisabled]}
+            disabled={isLoading}
+          >
+            {isLoading ? (
+              <ActivityIndicator size="small" color="#fff" />
+            ) : (
+              <Text style={{ color: '#fff', fontSize: 16 }}>Konsumo</Text>
+            )}
           </TouchableOpacity>
         </View>
       </View>
@@ -116,6 +206,7 @@ const CuponDetails = ({ onClose, product }) => {
   );
 };
 
+// Styles (unchanged from previous answer)
 const styles = StyleSheet.create({
   container: {
     alignItems: 'center',
@@ -126,11 +217,12 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: 'bold',
     marginVertical: 5
-    //marginBottom: 20,
   },
   text: {
     fontSize: 15,
     marginVertical: 5,
+    paddingVertical: 10,
+    paddingLeft: 30
   },
   button: {
     backgroundColor: '#242739ff',
@@ -138,6 +230,11 @@ const styles = StyleSheet.create({
     paddingVertical: 12,
     paddingHorizontal: 40,
     borderRadius: 30,
+    minWidth: 150,
+    alignItems: 'center'
+  },
+  buttonDisabled: {
+    backgroundColor: '#999',
   },
   icon: {
     height: 30,
@@ -149,12 +246,15 @@ const styles = StyleSheet.create({
   input: {
     backgroundColor: '#ffffffff',
     paddingLeft: 30,
-    // NEW: Add height for consistency
     height: 40,
     justifyContent: 'center',
   },
-  text: {
-    paddingVertical: 10, paddingLeft: 30
+  errorText: {
+    color: 'red',
+    textAlign: 'center',
+    marginTop: 15,
+    fontSize: 14,
+    fontWeight: 'bold'
   }
 });
 

@@ -3,14 +3,12 @@ import { View, Text, Modal, TouchableOpacity, Image, StyleSheet, TextInput, Acti
 import { getCuponDetails } from '../api/authService';
 import CuponDetails from './CuponDetails'
 
-const MeInputButton = ({ visible, onClose }) => {
+const MeInputButton = ({ visible, onClose, showDetails, setShowDetails }) => {
 
   const [inputvalue, setInputValue] = useState('');
   const [reedem, setReedem] = useState(false);
-  const [showDetails, setShowDetails] = useState(false);
   const [cuponData, setCuponData] = useState(null);
   const [loading, setLoading] = useState(false);
-
   const handleChangeText = (text) => {
     const numericValue = text.replace(/[^0-9]/g, '');
     if (numericValue.length <= 8) {
@@ -54,9 +52,11 @@ const MeInputButton = ({ visible, onClose }) => {
             product={cuponData}
             onClose={() => {
               setShowDetails(false);
-              setInputValue('');
+              // setInputValue('');
               onClose();
             }}
+            couponCode={inputvalue}
+            setInputValue={setInputValue}
           />
         ) : (
           <>
