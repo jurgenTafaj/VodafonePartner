@@ -19,7 +19,7 @@ const Table = ({ coupon, invoice_amount, discount, added, product, addedDate, ad
 
       </View>
 
-      <View style={{ marginBottom: 20, marginHorizontal: 20 }}>
+      <View style={{ marginBottom: 20, marginHorizontal: 10 }}>
         <View style={[styles.line1, styles.lines]}>
           <Text style={styles.line}>Kuponi</Text>
           <Text style={styles.line}>Fatura</Text>

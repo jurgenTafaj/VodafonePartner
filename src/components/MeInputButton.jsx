@@ -254,7 +254,7 @@ import { View, Text, TouchableOpacity, Image, StyleSheet, TextInput, ActivityInd
 import { getCuponDetails } from '../api/authService';
 import CuponDetails from './CuponDetails'
 
-const MeInputButton = ({ onClose }) => {
+const MeInputButton = ({ onClose, setHeaderProps }) => {
 
   const { width } = useWindowDimensions();
 
@@ -289,7 +289,12 @@ const MeInputButton = ({ onClose }) => {
 
       setCuponData(response.data);
       setShowDetails(true);
-      //onShowDetailsChange(true); // 🔥 Notify HomeScreen
+
+      setHeaderProps({
+        text1: 'KUPONI',
+        imageURL: 'cupon',
+        text2: '11233897'
+      })
       setLoading(false);
     } catch (error) {
       console.error(error);
@@ -299,6 +304,7 @@ const MeInputButton = ({ onClose }) => {
   };
 
   return (
+
 
     <View style={[styles.container, { width }]}>
       <View style={styles.imageContainer}>
@@ -326,6 +332,12 @@ const MeInputButton = ({ onClose }) => {
           setShowDetails(false);
           setInputValue('');
           onClose();
+
+          setHeaderProps({
+            text1: 'XHIRO DITORE',
+            imageURL: 'home',
+            text2: '0',
+          })
         }} />}
     </View>
 

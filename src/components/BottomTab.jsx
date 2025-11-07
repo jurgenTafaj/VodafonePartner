@@ -14,6 +14,7 @@ const Tab = createBottomTabNavigator();
 export default function BottomTab() {
   return (
     <SafeAreaView style={{ flex: 1, zIndex: 1 }} edges={['bottom']}>
+
       <Tab.Navigator screenOptions={{
         headerShown: false,
         tabBarShowLabel: false,
@@ -21,8 +22,11 @@ export default function BottomTab() {
           backgroundColor: '#db0000ff',
           borderTopWidth: 0,
           elevation: 5,
-          height: 60,
-        }
+          height: 65,
+        },
+        tabBarActiveBackgroundColor: '#c10303ff',
+        tabBarInactiveBackgroundColor: '#db0000ff',
+
       }}>
 
         <Tab.Screen name="Home" component={HomeScreen} options={{
