@@ -14,9 +14,6 @@ const Tab = createBottomTabNavigator();
 
 export default function BottomTab() {
   return (
-    // You should apply flex: 1 to the PARENT of this component
-    // or wrap the Tab.Navigator in a View with flex: 1 if this is your root.
-    // The SafeAreaView here is good, but I'll add flex: 1 to it.
     <SafeAreaView style={{ flex: 1, backgroundColor: '#db0000ff' }} edges={['bottom']}>
       <Tab.Navigator
         screenOptions={{
@@ -28,14 +25,8 @@ export default function BottomTab() {
             elevation: 5,
             height: 60,
           },
-          
-          // --- THIS IS THE FIX ---
-          // Sets the color for the whole active tab button
           tabBarActiveBackgroundColor: '#c10303ff', 
-          
-          // Sets the color for the inactive tab buttons
           tabBarInactiveBackgroundColor: '#db0000ff', 
-          // --- END OF FIX ---
         }}
       >
 

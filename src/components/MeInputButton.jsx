@@ -2,11 +2,9 @@ import React, { useState } from 'react';
 import { View, Text, TouchableOpacity, Image, StyleSheet, TextInput, ActivityIndicator, useWindowDimensions } from 'react-native';
 import { getCuponDetails } from '../api/authService';
 import CuponDetails from './CuponDetails'
-const MeInputButton = ({ visible, onClose }) => {
-
+const MeInputButton = ({ visible, onClose, setHeaderProps}) => {
 
   const [reedem, setReedem] = useState(false);
-
   const { width } = useWindowDimensions();
 
   const [inputValue, setInputValue] = useState('');
@@ -40,7 +38,12 @@ const MeInputButton = ({ visible, onClose }) => {
 
       setCuponData(response.data);
       setShowDetails(true);
-      //onShowDetailsChange(true); // 🔥 Notify HomeScreen
+
+      setHeaderProps({
+        text1: 'KUPONI',
+        imageURL: 'cupon',
+        text2: '11233897'
+      })
       setLoading(false);
     } catch (error) {
       console.error(error);
@@ -50,6 +53,7 @@ const MeInputButton = ({ visible, onClose }) => {
   };
 
   return (
+
 
     <View style={[styles.container, { width }]}>
       <View style={styles.imageContainer}>
@@ -74,15 +78,18 @@ const MeInputButton = ({ visible, onClose }) => {
 
       {showDetails && <CuponDetails
         product={cuponData}
+        setInputValue={setInputValue}
+        couponCode={inputValue}
+        setHeaderProps({
+            text1: 'XHIRO DITORE',
+            imageURL: 'home',
+            text2: '0',
+          })
         onClose={() => {
           setShowDetails(false);
           // setInputValue('');
           onClose();
-        }}
-        setInputValue={setInputValue}
-        couponCode={inputValue}
-      />
-      }
+        }} />}
     </View>
 
   )

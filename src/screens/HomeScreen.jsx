@@ -9,6 +9,14 @@ export default function HomeScreen() {
 
   const navigation = useNavigation();
 
+  const [headerProps, setHeaderProps] = useState({
+    text1: 'XHIRO DITORE',
+    imageURL: 'home',
+    text2: '0'
+  })
+
+
+
   const [showComponent, setShowComponent] = useState(false);
   const [showDetails, setShowDetails] = useState(false);
   const [dailyAmount, setDailyAmount] = useState(0);
@@ -44,12 +52,10 @@ export default function HomeScreen() {
 
   return (
     <View style={{ flex: 1, backgroundColor: '#e5e5e5ff' }}>
-      
-      {/* Show '...' while loading, then show the amount */}
-      <HeaderImage text1="XHIRO DITORE" imageURL="home" text2={isLoading ? '...' : dailyAmount} />
-      
-      <View style={{ flex: 1, paddingHorizontal: 30 }}>
-        <Image source={require('../assets/pictures/kuponi_1.png')} style={{ height: 150, width: 350, }} />
+
+      <HeaderImage text1={headerProps.text1} imageURL={headerProps.imageURL} text2={headerProps.text2} />
+      <View style={{ flex: 1, paddingHorizontal: 30, }}>
+        <Image source={require('../assets/pictures/kuponi_1.png')} style={{ height: 150, width: 350, marginVertical: -80 }} />
       </View>
 
       <View style={{ flexDirection: 'row' }}>
@@ -79,7 +85,7 @@ export default function HomeScreen() {
         </View>
 
       </View>
-      {showComponent && <MeInputButton onClose={() => setShowComponent(false)} />}
+      {showComponent && <MeInputButton onClose={() => setShowComponent(false)} setHeaderProps={setHeaderProps} />}
 
     </View>
   )

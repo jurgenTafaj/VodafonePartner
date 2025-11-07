@@ -133,41 +133,43 @@ export default function InfoScreen() {
   return (
     <>
       <HeaderImage text1="PERDORUESI" text2="adrionadmin" imageURL="notHome" />
-      <View style={{ flex: 1, marginTop: -420 }}>
-        <ScrollView style={styles.scrollView}>
+      <View style={{ flex: 1, marginTop: -180, marginBottom: -270 }}>
 
-          <View style={{ flexDirection: 'row', marginHorizontal: 15 }}>
-            <Image source={require('../assets/icons/sm_agenda_search.png')} style={styles.logo} />
-            <Text style={{ fontWeight: 'bold', paddingTop: 10, fontSize: 15 }}>Kërko me datë</Text>
-          </View>
+        <View style={{ flexDirection: 'row', marginHorizontal: 15 }}>
+          <Image source={require('../assets/icons/sm_agenda_search.png')} style={styles.logo} />
+          <Text style={{ fontWeight: 'bold', paddingTop: 10, fontSize: 15 }}>Kërko me datë</Text>
+        </View>
 
-          <View style={styles.datePickerContainer}>
-            <TouchableOpacity style={styles.buton} onPress={() => showPicker('Nga')}>
-              <Text style={styles.butonText}>Nga</Text>
-              <Text style={styles.butonDateText}>{dateFrom.toLocaleDateString()}</Text>
-            </TouchableOpacity>
-            <TouchableOpacity style={styles.buton} onPress={() => showPicker('Deri')}>
-              <Text style={styles.butonText}>Deri</Text>
-              <Text style={styles.butonDateText}>{dateTo.toLocaleDateString()}</Text>
-            </TouchableOpacity>
-          </View>
+        <View style={styles.datePickerContainer}>
+          <TouchableOpacity style={styles.buton} onPress={() => showPicker('Nga')}>
+            <Text style={styles.butonText}>Nga</Text>
+            <Text style={styles.butonDateText}>{dateFrom.toLocaleDateString()}</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.buton} onPress={() => showPicker('Deri')}>
+            <Text style={styles.butonText}>Deri</Text>
+            <Text style={styles.butonDateText}>{dateTo.toLocaleDateString()}</Text>
+          </TouchableOpacity>
+        </View>
 
-          {/* This part remains the same */}
-          <MyDatePicker
-            visible={isPickerVisible}
-            onConfirm={handleDateConfirm}
-            onCancel={hidePicker}
-            // NEW: Set the initial date on the picker
-            date={activeButton === 'Nga' ? dateFrom : dateTo}
-          />
+        {/* This part remains the same */}
+        <MyDatePicker
+          visible={isPickerVisible}
+          onConfirm={handleDateConfirm}
+          onCancel={hidePicker}
+          // NEW: Set the initial date on the picker
+          date={activeButton === 'Nga' ? dateFrom : dateTo}
+        />
 
-          {/* NEW: Render the content */}
-          <View style={styles.tableContainer}>
-            {renderContent()}
-          </View>
-
-        </ScrollView>
       </View>
+
+      <ScrollView style={styles.scrollView}>
+        {/* NEW: Render the content */}
+        <View style={styles.tableContainer}>
+          {renderContent()}
+        </View>
+
+      </ScrollView>
+
     </>
   )
 }
