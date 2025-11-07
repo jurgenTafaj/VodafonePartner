@@ -8,11 +8,9 @@ const HeaderImage = ({ text1, imageURL, text2 }) => {
     home: require('../assets/icons/portofoli.png'),
     notHome: require('../assets/icons/user_big.png'),
     cupon: require('../assets/icons/kuponi.png'),
-
   }
   const [fullName, setFullName] = useState('')
   const [profileImg, setProfileImg] = useState('')
-
   const [xhiroDitore, setXhiroDitore] = useState('')
 
   useEffect(() => {
@@ -28,7 +26,10 @@ const HeaderImage = ({ text1, imageURL, text2 }) => {
 
   return (
     <>
-      <View style={{ flex: 1, zIndex: 10 }}>
+      {/* --- 1. CHANGE THIS LINE --- */}
+      <View style={{ zIndex: 10 }}> 
+      {/* REMOVED flex: 1 */}
+      
         <ImageBackground
           source={require('../assets/pictures/small_wave.png')}
           style={styles.background}
@@ -54,7 +55,8 @@ const styles = StyleSheet.create({
     marginTop: 25,
   },
   background: {
-    flex: 1,
+    // --- 2. CHANGE THIS LINE ---
+    // REMOVED flex: 1
     height: 200
   },
   imageHeader: {

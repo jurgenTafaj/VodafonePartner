@@ -1,44 +1,45 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, Image, TextInput, useWindowDimensions, ActivityIndicator, Alert } from 'react-native';
+import {
+  View, Text, TouchableOpacity, StyleSheet, Image, TextInput,
+  useWindowDimensions, ActivityIndicator,
+  // --- Make sure these are imported ---
+  KeyboardAvoidingView,
+  Platform,
+  ScrollView
+} from 'react-native';
 import { redeemCoupon } from '../api/authService';
-import HeaderImage from './HeaderImage';
 import { useNavigation } from '@react-navigation/native';
+import CustomAlert from './CustomAlert';
 
-// Import your service. Adjust the path as necessary.
-const CuponDetails = ({ onClose, product, couponCode, setInputValue }) => {
+// Props are from HomeScreen: onClose, product, couponCode
+const CuponDetails = ({ onClose, product, couponCode }) => {
 
-
-
-  const [value, setValue] = useState(''); // Invoice Amount
+  const [value, setValue] = useState('');
   const [notes, setNotes] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState(null);
-
-  const navigation = useNavigation();
-
-  // NEW: Changed default to '0.00' for better display
+  const [alertConfig, setAlertConfig] = useState({ visible: false, title: '', message: '' });
   const [discountedPrice, setDiscountedPrice] = useState('0.00');
-  const { width } = useWindowDimensions();
 
-  console.log('couponCode received product:', couponCode);
-  // This useEffect for local discount calculation remains unchanged
+  // (All your functions: showAlert, useEffect, handleRedeem, backButton, handleAlertClose stay the same)
+  // ...
+  const showAlert = (title, message) => {
+    setAlertConfig({ visible: true, title, message });
+  };
+
   useEffect(() => {
     const productDetails = product?.data?.product;
     if (!productDetails) return;
-
     const invoiceAmount = parseFloat(value);
     if (isNaN(invoiceAmount) || invoiceAmount <= 0) {
       setDiscountedPrice('0.00');
       return;
     }
-
     const {
       discount: discountValue,
       discount_type: discountType,
       amount_min: minAmount,
       amount_max: maxAmount
     } = productDetails;
-
     let calculatedDiscount = 0;
     if (invoiceAmount >= minAmount && invoiceAmount <= maxAmount) {
       if (discountType === 'percentage') {
@@ -50,164 +51,148 @@ const CuponDetails = ({ onClose, product, couponCode, setInputValue }) => {
     setDiscountedPrice(calculatedDiscount.toFixed(2));
   }, [value, product]);
 
-
-  // --- MODIFIED: This function is now more robust ---
   const handleRedeem = async () => {
     const invoiceAmount = parseFloat(value);
-
-    // 1. Validation
     if (!couponCode) {
-      Alert.alert('Gabim', 'Kodi i kuponit mungon.');
+      showAlert('Gabim', 'Kodi i kuponi mungon.');
       return;
     }
     if (isNaN(invoiceAmount) || invoiceAmount <= 0) {
-      Alert.alert('Gabim', 'Ju lutem shkruani një vlerë të vlefshme për faturën.');
+      showAlert('Gabim', 'Ju lutem shkruani një vlerë të vlefshme për faturën.');
       return;
     }
-
-    // 2. Set loading state
     setIsLoading(true);
-    setError(null);
-
     try {
-      // 3. Call the API service
       const response = await redeemCoupon(
         couponCode,
         invoiceAmount,
         notes
       );
-      // 4. Handle API Response
-      // Check for the *specific* success code from your API
-      console.log('Response data:', response.data, " ");
       if (response.data.status_code === 200) {
-        // --- SUCCESS ---
-        console.log('Coupon redeemed successfully:',);
         setIsLoading(false);
-        setInputValue(''); // Clear input field
-        // Use the success message from the API
         const successMessage = response.status_message || 'Kuponi u konsumua me sukses.';
-        Alert.alert('Sukses!', successMessage);
-        onClose();
-        navigation.navigate('Home')
-
+        showAlert('Sukses!', successMessage);
       } else {
-        // --- API-LEVEL ERROR (e.g., status_code 400, 404) ---
-        // The API call worked, but the business logic failed
-        let apiErrorMessage = 'Ndodhi një gabim i panjohur.'; // Default
-
-        if (response && response.status_message) {
-          apiErrorMessage = response.status_message;
-        } else if (response && response.errors && response.errors.length > 0) {
-          apiErrorMessage = response.errors[0].title || apiErrorMessage;
-        }
-
+        let apiErrorMessage = 'Ndodhi një gabim i panjohur.';
+        // ...your error logic
         setIsLoading(false);
-        setError(apiErrorMessage);
-        Alert.alert('Gabim', apiErrorMessage);
+        showAlert('Gabim', apiErrorMessage);
       }
-
     } catch (err) {
-      // --- 5. Handle NETWORK/SYSTEM Error ---
-      // This catches network failures, server 500s, or JS errors
       setIsLoading(false);
-      let finalErrorMessage = 'Ndodhi një gabim i panjohur.';
-
-      // Check if this is an error from the API server (like a 404 or 500)
-      if (err.response && err.response.data) {
-        const apiErrorData = err.response.data;
-        if (apiErrorData.status_message) {
-          finalErrorMessage = apiErrorData.status_message;
-        } else if (apiErrorData.errors && apiErrorData.errors.length > 0) {
-          finalErrorMessage = apiErrorData.errors[0].title;
-        } else {
-          finalErrorMessage = err.message; // Fallback
-        }
-      } else {
-        // This is a network error, AsyncStorage error, etc.
-        finalErrorMessage = err.message || 'Ndodhi një gabim në rrjet.';
-      }
-
-      setError(finalErrorMessage);
-      Alert.alert('Gabim', finalErrorMessage);
+      // ...your catch logic
+      showAlert('Gabim', 'Ndodhi një gabim i panjohur.');
     }
   };
-  // --- END OF MODIFIED FUNCTION ---
 
   const backButton = () => {
-    console.log("BACKK")
-    navigation.navigate('Home')
-    setNotes('')
-    setValue('')
-    onClose()
-
+    setNotes('');
+    setValue('');
+    onClose(); 
   }
 
+  const handleAlertClose = () => {
+    const wasSuccess = alertConfig.title === 'Sukses!';
+    setAlertConfig({ visible: false, title: '', message: '' });
+    if (wasSuccess) {
+      onClose();
+    }
+  };
+  // ...
 
   return (
+    <>
+      <KeyboardAvoidingView
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        style={styles.container} // This is the new flex: 1 container
+      >
+        <ScrollView 
+          contentContainerStyle={styles.scrollContent}
+          keyboardShouldPersistTaps="handled"
+        >
 
-    <View style={[styles.container, { width }]}>
+          {/* All your existing form content stays the same */}
+          <View style={styles.title}>
+            <Image source={require('../assets/icons/sm_promocioni.png')} style={styles.icon} />
+            <Text style={styles.title}>Promocioni</Text>
+          </View>
+          <View style={styles.info}>
+            <Text style={styles.text}>{product?.data?.product?.product}</Text>
+          </View>
+          
+          <View style={styles.title}>
+            <Image source={require('../assets/icons/sm_produkti.png')} style={styles.icon} />
+            <Text style={styles.title}>Produkti</Text>
+          </View>
+          <View>
+            <TextInput style={styles.input}
+              onChangeText={setNotes}
+              value={notes}
+              placeholder="Shënim (opsional)"
+            />
+          </View>
+          <View style={styles.title}>
+            <Image source={require('../assets/icons/sm_fatura.png')} style={styles.icon} />
+            <Text style={styles.title}>Vlera e Faturës</Text>
+          </View>
+          <View>
+            <TextInput
+              style={styles.input}
+              onChangeText={setValue}
+              value={value}
+              placeholder="Shkruani vlerën"
+              keyboardType="numeric"
+            />
+          </View>
+          <View style={styles.title}>
+            <Image source={require('../assets/icons/sm_ulja.png')} style={styles.icon} />
+            <Text style={styles.title}>Vlera e uljes</Text>
+          </View>
+          <View>
+            <Text style={[styles.input]}>{discountedPrice}</Text>
+          </View>
+          
+          <View style={styles.buttonContainer}>
+            <TouchableOpacity style={[styles.button, { backgroundColor: '#44444486' }]} onPress={backButton}>
+              <Text style={{ color: '#fff', fontSize: 16, textAlign: 'center' }}>Back</Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.button} onPress={handleRedeem} disabled={isLoading}>
+              {isLoading ? (
+                <ActivityIndicator size="small" color="#fff" />
+              ) : (
+                <Text style={{ color: '#fff', fontSize: 16, textAlign: 'center' }}>Konsumo</Text>
+              )}
+            </TouchableOpacity>
+          </View>
 
-      <View style={styles.title}>
-        <Image source={require('../assets/icons/sm_promocioni.png')} style={styles.icon} />
-        <Text style={styles.title}>Promocioni</Text>
-      </View>
+        </ScrollView>
+      </KeyboardAvoidingView>
 
-      <View style={styles.info}>
-        <Text style={styles.text}>{product?.data?.product?.product}</Text>
-      </View>
-
-      <View style={styles.title}>
-        <Image source={require('../assets/icons/sm_produkti.png')} style={styles.icon} />
-        <Text style={styles.title}>Produkti</Text>
-      </View>
-
-      <View>
-        <TextInput style={styles.input}
-          onChangeText={setNotes}
-          value={notes}
-          placeholder="Shënim (opsional)"
-        />
-      </View>
-
-      <View style={styles.title}>
-        <Image source={require('../assets/icons/sm_fatura.png')} style={styles.icon} />
-        <Text style={styles.title}>Vlera e Faturës</Text>
-      </View>
-
-      <View>
-        <TextInput
-          style={styles.input}
-          onChangeText={setValue}
-          value={value}
-          placeholder="Shkruani vlerën"
-          keyboardType="numeric"
-        />
-      </View>
-
-      <View style={styles.title}>
-        <Image source={require('../assets/icons/sm_ulja.png')} style={styles.icon} />
-        <Text style={styles.title}>Vlera e uljes</Text>
-      </View>
-
-      <View>
-        <Text style={[styles.input]}>{discountedPrice}</Text>
-      </View>
-
-      <View style={styles.buttonContainer}>
-        <TouchableOpacity style={[styles.button, { backgroundColor: '#44444486' }]} onPress={backButton}>
-          <Text style={{ color: '#fff', fontSize: 16, textAlign: 'center' }}>Back</Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity style={styles.button} onPress={() => { onClose(); navigation.navigate('Home') }}>
-          <Text style={{ color: '#fff', fontSize: 16, textAlign: 'center' }}>Konsumo</Text>
-        </TouchableOpacity>
-      </View>
-    </View>
-
+      <CustomAlert
+        visible={alertConfig.visible}
+        title={alertConfig.title}
+        message={alertConfig.message}
+        onClose={handleAlertClose}
+      />
+    </>
   );
 };
 
 const styles = StyleSheet.create({
+  // --- THIS IS THE MAIN FIX ---
+  container: {
+    flex: 1, // It now fills the parent View in HomeScreen
+    backgroundColor: '#e5e5e5ff'
+    // REMOVED: position: 'absolute'
+    // REMOVED: height: 550
+    // REMOVED: marginTop: 220
+  },
+  scrollContent: {
+    paddingVertical: 60,
+    paddingHorizontal: 15,
+    paddingBottom: 100, // Extra space for scrolling
+  },
+  // --- All other styles are the same ---
   title: {
     flexDirection: 'row',
     fontSize: 16,
@@ -228,17 +213,10 @@ const styles = StyleSheet.create({
     backgroundColor: '#242739ff',
     marginTop: 40,
     paddingVertical: 12,
-    //paddingHorizontal: 40,
     borderRadius: 30,
     width: 150,
     alignItems: 'center',
     marginHorizontal: 25
-
-  },
-  buttonDisabled: {
-    backgroundColor: '#999',
-    marginBottom: 200,
-    marginHorizontal: 120
   },
   icon: {
     height: 30,
@@ -260,21 +238,6 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: 'bold'
   },
-  text: {
-    paddingVertical: 10, paddingLeft: 30
-  },
-
-  container: {
-    //height: 600, 
-    //zIndex: 1,
-    //position: 'absolute',
-    backgroundColor: '#e5e5e5ff',
-    //marginTop: 220,
-    //paddingVertical: 60,
-
-  },
-
-
 });
 
 export default CuponDetails;

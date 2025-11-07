@@ -14,7 +14,7 @@ const Tab = createBottomTabNavigator();
 
 export default function BottomTab() {
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: '#db0000ff' }} edges={['bottom']}>
+    <View style={{ flex: 1, backgroundColor: '#db0000ff' }} edges={['bottom']}>
       <Tab.Navigator
         screenOptions={{
           headerShown: false,
@@ -68,7 +68,7 @@ export default function BottomTab() {
         }} />
 
       </Tab.Navigator>
-    </SafeAreaView>
+    </View>
   );
 }
 

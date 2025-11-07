@@ -1,17 +1,25 @@
 import React, { useState } from 'react';
-import { View, Text, TouchableOpacity, Image, StyleSheet, TextInput, ActivityIndicator, useWindowDimensions } from 'react-native';
+import {
+  View, Text, TouchableOpacity, Image, StyleSheet, TextInput,
+  ActivityIndicator, useWindowDimensions,
+  // --- Make sure these are imported ---
+  KeyboardAvoidingView,
+  Platform,
+  ScrollView
+} from 'react-native';
 import { getCuponDetails } from '../api/authService';
-import CuponDetails from './CuponDetails'
-const MeInputButton = ({ visible, onClose, setHeaderProps }) => {
+import CustomAlert from './CustomAlert';
 
-  const [reedem, setReedem] = useState(false);
-  const { width } = useWindowDimensions();
+// Props are from HomeScreen: onClose, setHeaderProps, onSubmit
+const MeInputButton = ({ onClose, setHeaderProps, onSubmit }) => {
 
   const [inputValue, setInputValue] = useState('');
   const [loading, setLoading] = useState(false);
-  const [cuponData, setCuponData] = useState(null);
-  const [showDetails, setShowDetails] = useState(false);
+  const [alertConfig, setAlertConfig] = useState({ visible: false, title: '', message: '' });
 
+  const showAlert = (title, message) => {
+    setAlertConfig({ visible: true, title, message });
+  };
 
   const handleChangeText = (text) => {
     const numericValue = text.replace(/[^0-9]/g, '');
@@ -23,87 +31,47 @@ const MeInputButton = ({ visible, onClose, setHeaderProps }) => {
   const handleRedeem = async () => {
     setLoading(true);
     if (!inputValue) {
-      alert('Ju lutem shkruani një kod kuponi');
+      showAlert('Gabim', 'Ju lutem shkruani një kod kuponi');
       setLoading(false);
       return;
     }
-
     try {
       const response = await getCuponDetails(inputValue, '');
+      console.log('Cupon Details Response:', response);
       if (response.data.status_code !== 200) {
-        alert(response.data.status_message || 'Dicka shkoi keq');
+        showAlert('Gabim', response.data.status_message || 'Dicka shkoi keq');
         setLoading(false);
         return;
       }
-
-      setCuponData(response.data);
-      setShowDetails(true);
-
       setHeaderProps({
         text1: 'KUPONI',
         imageURL: 'cupon',
-        text2: '11233897'
-      })
+        text2: inputValue
+      });
       setLoading(false);
+      onSubmit(response.data, inputValue);
     } catch (error) {
       console.error(error);
-      alert('Gabim gjatë verifikimit të kuponit');
+      showAlert('Gabim', 'Gabim gjatë verifikimit të kuponit');
       setLoading(false);
     }
   };
 
   return (
-
-
-    <View style={[styles.container, { width }]}>
-
-
-      {/* {loading ? (
-        <ActivityIndicator size="large" color="#0000ff" />
-      ) : (
-        <View style={{ marginTop: 150, marginHorizontal: 100 }}>
-          <TouchableOpacity style={styles.button} onPress={handleRedeem}>
-            <Text style={{ color: '#fff', fontSize: 18, textAlign: 'center' }}>Dërgggo</Text>
+    <>
+      {/* Use KeyboardAvoidingView to handle the keyboard */}
+      <KeyboardAvoidingView
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        style={styles.container} // This is the new flex: 1 container
+      >
+        <ScrollView 
+          contentContainerStyle={styles.scrollContent}
+          keyboardShouldPersistTaps="handled"
+        >
+          <TouchableOpacity onPress={onClose} style={styles.backButton}>
+            <Text style={styles.backButtonText}>{"< Kthehu"}</Text>
           </TouchableOpacity>
-        </View>
-      )}
 
-      {showDetails && <CuponDetails
-        product={cuponData}
-        setInputValue={setInputValue}
-        couponCode={inputValue}
-
-        onClose={() => {
-          setShowDetails(false);
-          // setInputValue('');
-          onClose();
-          setHeaderProps({
-            text1: 'XHIRO DITORE',
-            imageURL: 'home',
-            text2: '0'
-          })
-
-        }}
-
-      />} */}
-
-      {showDetails ? (
-        <CuponDetails
-          product={cuponData}
-          setInputValue={setInputValue}
-          couponCode={inputValue}
-          onClose={() => {
-            setShowDetails(false);
-            onClose(); // closes MeInputButton in parent
-            setHeaderProps({
-              text1: 'XHIRO DITORE',
-              imageURL: 'home',
-              text2: '0'
-            });
-          }}
-        />
-      ) : (
-        <>
           <View style={styles.imageContainer}>
             <Image source={require('../assets/icons/input_icon.png')} style={styles.icon} />
           </View>
@@ -122,25 +90,34 @@ const MeInputButton = ({ visible, onClose, setHeaderProps }) => {
               </TouchableOpacity>
             </View>
           )}
-        </>
-      )}
-    </View>
+        </ScrollView>
+      </KeyboardAvoidingView>
 
+      <CustomAlert
+        visible={alertConfig.visible}
+        title={alertConfig.title}
+        message={alertConfig.message}
+        onClose={() => setAlertConfig({ visible: false, title: '', message: '' })}
+      />
+    </>
   )
 }
 
 const styles = StyleSheet.create({
+  // --- THIS IS THE MAIN FIX ---
   container: {
-    //zIndex: 1,
-    position: 'absolute',
-    flex: 1,
-    backgroundColor: '#aba8a8ff',
-    height: 550,
-    marginTop: 220,
-    paddingVertical: 60,
+    flex: 1, // It now fills the parent View in HomeScreen
     backgroundColor: '#e5e5e5ff'
+    // REMOVED: position: 'absolute'
+    // REMOVED: height: 550
+    // REMOVED: marginTop: 220
   },
-
+  scrollContent: {
+    alignItems: 'center', // Center content
+    paddingVertical: 60, // Add padding here instead
+    paddingBottom: 100, // Extra space for scrolling
+  },
+  // --- All other styles are the same ---
   input: {
     backgroundColor: '#fff',
     width: 300,
@@ -148,11 +125,8 @@ const styles = StyleSheet.create({
     fontSize: 15,
     textAlign: 'center',
   },
-
   button: {
     backgroundColor: '#242739ff',
-    //marginHorizontal: 130,
-    //marginVertical: 50,
     paddingVertical: 15,
     borderRadius: 50,
     width: 200,
@@ -163,6 +137,18 @@ const styles = StyleSheet.create({
   },
   imageContainer: {
     marginHorizontal: 150
+  },
+  backButton: {
+    position: 'absolute',
+    top: 20,
+    left: 20,
+    padding: 10,
+    zIndex: 10,
+  },
+  backButtonText: {
+    fontSize: 16,
+    color: '#242739ff',
+    fontWeight: 'bold'
   }
 })
 
