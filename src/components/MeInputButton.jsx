@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { View, Text, TouchableOpacity, Image, StyleSheet, TextInput, ActivityIndicator, useWindowDimensions } from 'react-native';
 import { getCuponDetails } from '../api/authService';
 import CuponDetails from './CuponDetails'
-const MeInputButton = ({ visible, onClose, setHeaderProps}) => {
+const MeInputButton = ({ visible, onClose, setHeaderProps }) => {
 
   const [reedem, setReedem] = useState(false);
   const { width } = useWindowDimensions();
@@ -56,17 +56,9 @@ const MeInputButton = ({ visible, onClose, setHeaderProps}) => {
 
 
     <View style={[styles.container, { width }]}>
-      <View style={styles.imageContainer}>
-        <Image source={require('../assets/icons/input_icon.png')} style={styles.icon} />
-      </View>
 
-      <Text style={{ fontSize: 16, paddingVertical: 30, paddingHorizontal: 120 }}>Shkruaj kodin e kuponit</Text>
 
-      <View style={{ marginHorizontal: 50 }}>
-        <TextInput value={inputValue} onChangeText={handleChangeText} style={styles.input} keyboardType="numeric" />
-      </View>
-
-      {loading ? (
+      {/* {loading ? (
         <ActivityIndicator size="large" color="#0000ff" />
       ) : (
         <View style={{ marginTop: 150, marginHorizontal: 100 }}>
@@ -80,16 +72,58 @@ const MeInputButton = ({ visible, onClose, setHeaderProps}) => {
         product={cuponData}
         setInputValue={setInputValue}
         couponCode={inputValue}
-        setHeaderProps({
-            text1: 'XHIRO DITORE',
-            imageURL: 'home',
-            text2: '0',
-          })
+
         onClose={() => {
           setShowDetails(false);
           // setInputValue('');
           onClose();
-        }} />}
+          setHeaderProps({
+            text1: 'XHIRO DITORE',
+            imageURL: 'home',
+            text2: '0'
+          })
+
+        }}
+
+      />} */}
+
+      {showDetails ? (
+        <CuponDetails
+          product={cuponData}
+          setInputValue={setInputValue}
+          couponCode={inputValue}
+          onClose={() => {
+            setShowDetails(false);
+            onClose(); // closes MeInputButton in parent
+            setHeaderProps({
+              text1: 'XHIRO DITORE',
+              imageURL: 'home',
+              text2: '0'
+            });
+          }}
+        />
+      ) : (
+        <>
+          <View style={styles.imageContainer}>
+            <Image source={require('../assets/icons/input_icon.png')} style={styles.icon} />
+          </View>
+
+          <Text style={{ fontSize: 16, paddingVertical: 30, paddingHorizontal: 120 }}>Shkruaj kodin e kuponit</Text>
+
+          <View style={{ marginHorizontal: 50 }}>
+            <TextInput value={inputValue} onChangeText={handleChangeText} style={styles.input} keyboardType="numeric" />
+          </View>
+          {loading ? (
+            <ActivityIndicator size="large" color="#0000ff" />
+          ) : (
+            <View style={{ marginTop: 150, marginHorizontal: 100 }}>
+              <TouchableOpacity style={styles.button} onPress={handleRedeem}>
+                <Text style={{ color: '#fff', fontSize: 18, textAlign: 'center' }}>Dërgggo</Text>
+              </TouchableOpacity>
+            </View>
+          )}
+        </>
+      )}
     </View>
 
   )
@@ -97,7 +131,7 @@ const MeInputButton = ({ visible, onClose, setHeaderProps}) => {
 
 const styles = StyleSheet.create({
   container: {
-    zIndex: 1,
+    //zIndex: 1,
     position: 'absolute',
     flex: 1,
     backgroundColor: '#aba8a8ff',

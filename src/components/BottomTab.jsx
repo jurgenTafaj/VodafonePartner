@@ -23,27 +23,27 @@ export default function BottomTab() {
             backgroundColor: '#db0000ff', // General bar color
             borderTopWidth: 0,
             elevation: 5,
-            height: 60,
+            height: 70,
           },
-          tabBarActiveBackgroundColor: '#c10303ff', 
-          tabBarInactiveBackgroundColor: '#db0000ff', 
+          tabBarActiveBackgroundColor: '#c10303ff',
+          tabBarInactiveBackgroundColor: '#db0000ff',
         }}
       >
 
         <Tab.Screen name="Home" component={HomeScreen} options={{
 
           tabBarIcon: ({ focused }) => (
-            <Image 
-              source={require('../assets/icons/menu_home.png')} 
-              style={styles.icon} 
+            <Image
+              source={require('../assets/icons/menu_home.png')}
+              style={styles.icon}
             />
           ),
         }} />
 
         <Tab.Screen name="Info" component={InfoScreen} options={{
           tabBarIcon: ({ focused }) => (
-            <Image 
-              source={require('../assets/icons/menu_raport.png')} 
+            <Image
+              source={require('../assets/icons/menu_raport.png')}
               style={styles.icon}
             />
           ),
@@ -51,8 +51,8 @@ export default function BottomTab() {
 
         <Tab.Screen name="Settings" component={SettingsScreen} options={{
           tabBarIcon: ({ focused }) => (
-            <Image 
-              source={require('../assets/icons/menu_settings.png')} 
+            <Image
+              source={require('../assets/icons/menu_settings.png')}
               style={styles.icon}
             />
           ),
@@ -60,8 +60,8 @@ export default function BottomTab() {
 
         <Tab.Screen name="Logout" component={LogoutScreen} options={{
           tabBarIcon: ({ focused }) => (
-            <Image 
-              source={require('../assets/icons/logout_red.png')} 
+            <Image
+              source={require('../assets/icons/logout_red.png')}
               style={styles.icon}
             />
           ),

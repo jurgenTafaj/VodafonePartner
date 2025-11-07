@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, Image, TextInput,useWindowDimensions, ActivityIndicator, Alert } from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet, Image, TextInput, useWindowDimensions, ActivityIndicator, Alert } from 'react-native';
 import { redeemCoupon } from '../api/authService';
 import HeaderImage from './HeaderImage';
 import { useNavigation } from '@react-navigation/native';
 
 // Import your service. Adjust the path as necessary.
 const CuponDetails = ({ onClose, product, couponCode, setInputValue }) => {
+
 
 
   const [value, setValue] = useState(''); // Invoice Amount
@@ -80,20 +81,20 @@ const CuponDetails = ({ onClose, product, couponCode, setInputValue }) => {
       console.log('Response data:', response.data, " ");
       if (response.data.status_code === 200) {
         // --- SUCCESS ---
-        console.log('Coupon redeemed successfully:', );
+        console.log('Coupon redeemed successfully:',);
         setIsLoading(false);
         setInputValue(''); // Clear input field
         // Use the success message from the API
         const successMessage = response.status_message || 'Kuponi u konsumua me sukses.';
         Alert.alert('Sukses!', successMessage);
-        onClose(); 
+        onClose();
         navigation.navigate('Home')
 
       } else {
         // --- API-LEVEL ERROR (e.g., status_code 400, 404) ---
         // The API call worked, but the business logic failed
         let apiErrorMessage = 'Ndodhi një gabim i panjohur.'; // Default
-        
+
         if (response && response.status_message) {
           apiErrorMessage = response.status_message;
         } else if (response && response.errors && response.errors.length > 0) {
@@ -132,6 +133,16 @@ const CuponDetails = ({ onClose, product, couponCode, setInputValue }) => {
   };
   // --- END OF MODIFIED FUNCTION ---
 
+  const backButton = () => {
+    console.log("BACKK")
+    navigation.navigate('Home')
+    setNotes('')
+    setValue('')
+    onClose()
+
+  }
+
+
   return (
 
     <View style={[styles.container, { width }]}>
@@ -151,7 +162,7 @@ const CuponDetails = ({ onClose, product, couponCode, setInputValue }) => {
       </View>
 
       <View>
-        <TextInput style={styles.input} 
+        <TextInput style={styles.input}
           onChangeText={setNotes}
           value={notes}
           placeholder="Shënim (opsional)"
@@ -183,7 +194,11 @@ const CuponDetails = ({ onClose, product, couponCode, setInputValue }) => {
       </View>
 
       <View style={styles.buttonContainer}>
-        <TouchableOpacity style={styles.button} onPress={handleRedeem}>
+        <TouchableOpacity style={[styles.button, { backgroundColor: '#44444486' }]} onPress={backButton}>
+          <Text style={{ color: '#fff', fontSize: 16, textAlign: 'center' }}>Back</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity style={styles.button} onPress={() => { onClose(); navigation.navigate('Home') }}>
           <Text style={{ color: '#fff', fontSize: 16, textAlign: 'center' }}>Konsumo</Text>
         </TouchableOpacity>
       </View>
@@ -205,14 +220,20 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
     paddingLeft: 30
   },
+  buttonContainer: {
+    flexDirection: 'row',
+    marginHorizontal: 5
+  },
   button: {
     backgroundColor: '#242739ff',
     marginTop: 40,
     paddingVertical: 12,
-    paddingHorizontal: 40,
+    //paddingHorizontal: 40,
     borderRadius: 30,
-    minWidth: 150,
-    alignItems: 'center'
+    width: 150,
+    alignItems: 'center',
+    marginHorizontal: 25
+
   },
   buttonDisabled: {
     backgroundColor: '#999',
@@ -244,9 +265,9 @@ const styles = StyleSheet.create({
   },
 
   container: {
-    //height: 600,
+    //height: 600, 
     //zIndex: 1,
-    position: 'absolute',
+    //position: 'absolute',
     backgroundColor: '#e5e5e5ff',
     //marginTop: 220,
     //paddingVertical: 60,
