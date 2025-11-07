@@ -1,37 +1,36 @@
-import React, { useState, useEffect } from 'react'; // NEW: Added useEffect
-import { View, Text, TouchableOpacity, StyleSheet, Image, TextInput, useWindowDimensions } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { View, Text, TouchableOpacity, StyleSheet, Image, TextInput,useWindowDimensions, ActivityIndicator, Alert } from 'react-native';
+import { redeemCoupon } from '../api/authService';
 import HeaderImage from './HeaderImage';
 import { useNavigation } from '@react-navigation/native';
 
-//hoqa onClose nga props
-const CuponDetails = ({ product, onClose }) => {
+// Import your service. Adjust the path as necessary.
+const CuponDetails = ({ onClose, product, couponCode, setInputValue }) => {
+
+
+  const [value, setValue] = useState(''); // Invoice Amount
+  const [notes, setNotes] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState(null);
 
   const navigation = useNavigation();
-  const [value, setValue] = useState(''); // This is the Invoice Amount
 
   // NEW: Changed default to '0.00' for better display
   const [discountedPrice, setDiscountedPrice] = useState('0.00');
   const { width } = useWindowDimensions();
 
-  console.log(JSON.stringify(product));
-
-  // NEW: useEffect hook to calculate the discount
+  console.log('couponCode received product:', couponCode);
+  // This useEffect for local discount calculation remains unchanged
   useEffect(() => {
-    // Get the product details safely
     const productDetails = product?.data?.product;
-    if (!productDetails) {
-      return; // Exit if there's no product data
-    }
+    if (!productDetails) return;
 
     const invoiceAmount = parseFloat(value);
-
-    // Check if the input is a valid number
     if (isNaN(invoiceAmount) || invoiceAmount <= 0) {
-      setDiscountedPrice('0.00'); // Reset if input is empty or invalid
+      setDiscountedPrice('0.00');
       return;
     }
 
-    // Get discount rules from the product prop
     const {
       discount: discountValue,
       discount_type: discountType,
@@ -40,25 +39,98 @@ const CuponDetails = ({ product, onClose }) => {
     } = productDetails;
 
     let calculatedDiscount = 0;
-
-    // Check if the invoice amount is within the valid range for the coupon
     if (invoiceAmount >= minAmount && invoiceAmount <= maxAmount) {
-
       if (discountType === 'percentage') {
-        // --- Percentage Logic ---
         calculatedDiscount = (invoiceAmount * discountValue) / 100;
-
       } else if (discountType === 'static') {
-        // --- Static Logic ---
-        // The discount cannot be more than the invoice amount itself
         calculatedDiscount = Math.min(discountValue, invoiceAmount);
       }
     }
-
-    // Update the state, formatted to 2 decimal places
     setDiscountedPrice(calculatedDiscount.toFixed(2));
+  }, [value, product]);
 
-  }, [value, product]); // Re-run this logic whenever 'value' or 'product' changes
+
+  // --- MODIFIED: This function is now more robust ---
+  const handleRedeem = async () => {
+    const invoiceAmount = parseFloat(value);
+
+    // 1. Validation
+    if (!couponCode) {
+      Alert.alert('Gabim', 'Kodi i kuponit mungon.');
+      return;
+    }
+    if (isNaN(invoiceAmount) || invoiceAmount <= 0) {
+      Alert.alert('Gabim', 'Ju lutem shkruani një vlerë të vlefshme për faturën.');
+      return;
+    }
+
+    // 2. Set loading state
+    setIsLoading(true);
+    setError(null);
+
+    try {
+      // 3. Call the API service
+      const response = await redeemCoupon(
+        couponCode,
+        invoiceAmount,
+        notes
+      );
+      // 4. Handle API Response
+      // Check for the *specific* success code from your API
+      console.log('Response data:', response.data, " ");
+      if (response.data.status_code === 200) {
+        // --- SUCCESS ---
+        console.log('Coupon redeemed successfully:', );
+        setIsLoading(false);
+        setInputValue(''); // Clear input field
+        // Use the success message from the API
+        const successMessage = response.status_message || 'Kuponi u konsumua me sukses.';
+        Alert.alert('Sukses!', successMessage);
+        onClose(); 
+        navigation.navigate('Home')
+
+      } else {
+        // --- API-LEVEL ERROR (e.g., status_code 400, 404) ---
+        // The API call worked, but the business logic failed
+        let apiErrorMessage = 'Ndodhi një gabim i panjohur.'; // Default
+        
+        if (response && response.status_message) {
+          apiErrorMessage = response.status_message;
+        } else if (response && response.errors && response.errors.length > 0) {
+          apiErrorMessage = response.errors[0].title || apiErrorMessage;
+        }
+
+        setIsLoading(false);
+        setError(apiErrorMessage);
+        Alert.alert('Gabim', apiErrorMessage);
+      }
+
+    } catch (err) {
+      // --- 5. Handle NETWORK/SYSTEM Error ---
+      // This catches network failures, server 500s, or JS errors
+      setIsLoading(false);
+      let finalErrorMessage = 'Ndodhi një gabim i panjohur.';
+
+      // Check if this is an error from the API server (like a 404 or 500)
+      if (err.response && err.response.data) {
+        const apiErrorData = err.response.data;
+        if (apiErrorData.status_message) {
+          finalErrorMessage = apiErrorData.status_message;
+        } else if (apiErrorData.errors && apiErrorData.errors.length > 0) {
+          finalErrorMessage = apiErrorData.errors[0].title;
+        } else {
+          finalErrorMessage = err.message; // Fallback
+        }
+      } else {
+        // This is a network error, AsyncStorage error, etc.
+        finalErrorMessage = err.message || 'Ndodhi një gabim në rrjet.';
+      }
+
+      setError(finalErrorMessage);
+      Alert.alert('Gabim', finalErrorMessage);
+    }
+  };
+  // --- END OF MODIFIED FUNCTION ---
 
   return (
 
@@ -79,7 +151,11 @@ const CuponDetails = ({ product, onClose }) => {
       </View>
 
       <View>
-        <TextInput style={styles.input} />
+        <TextInput style={styles.input} 
+          onChangeText={setNotes}
+          value={notes}
+          placeholder="Shënim (opsional)"
+        />
       </View>
 
       <View style={styles.title}>
@@ -107,7 +183,7 @@ const CuponDetails = ({ product, onClose }) => {
       </View>
 
       <View style={styles.buttonContainer}>
-        <TouchableOpacity style={styles.button} onPress={() => { onClose(); navigation.navigate('Home') }}>
+        <TouchableOpacity style={styles.button} onPress={handleRedeem}>
           <Text style={{ color: '#fff', fontSize: 16, textAlign: 'center' }}>Konsumo</Text>
         </TouchableOpacity>
       </View>
@@ -116,18 +192,18 @@ const CuponDetails = ({ product, onClose }) => {
   );
 };
 
-
 const styles = StyleSheet.create({
   title: {
     flexDirection: 'row',
     fontSize: 16,
     fontWeight: 'bold',
     marginVertical: 5
-    //marginBottom: 20,
   },
   text: {
     fontSize: 15,
     marginVertical: 5,
+    paddingVertical: 10,
+    paddingLeft: 30
   },
   button: {
     backgroundColor: '#242739ff',
@@ -135,6 +211,11 @@ const styles = StyleSheet.create({
     paddingVertical: 12,
     paddingHorizontal: 40,
     borderRadius: 30,
+    minWidth: 150,
+    alignItems: 'center'
+  },
+  buttonDisabled: {
+    backgroundColor: '#999',
     marginBottom: 200,
     marginHorizontal: 120
   },
@@ -150,6 +231,13 @@ const styles = StyleSheet.create({
     paddingLeft: 30,
     height: 40,
     justifyContent: 'center',
+  },
+  errorText: {
+    color: 'red',
+    textAlign: 'center',
+    marginTop: 15,
+    fontSize: 14,
+    fontWeight: 'bold'
   },
   text: {
     paddingVertical: 10, paddingLeft: 30

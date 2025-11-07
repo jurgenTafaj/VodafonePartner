@@ -81,3 +81,18 @@ export const getSales = async (dateFrom, dateTo, limit = "100") => {
   // The request is sent to the base URL (which the server handles based on the 'action' field)
   return apiClient.post('/', formData); 
 };
+
+export const getDailySalesAmounts = async () => {
+  const userId = await AsyncStorage.getItem('userId');
+  if (!userId) {
+    throw new Error('User ID not found in storage. Please log in first.');
+  }
+
+  const formData = new FormData();
+  formData.append('action', 'getDailySalesAmounts');
+  formData.append('type_id', TYPE_ID); // Static TYPE_ID
+  formData.append('user_id', userId); // Retrieved from storage
+  
+  // The request is sent to the base URL (which the server handles based on the 'action' field)
+  return apiClient.post('/', formData); 
+};
