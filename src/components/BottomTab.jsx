@@ -14,10 +14,10 @@ const Tab = createBottomTabNavigator();
 
 export default function BottomTab() {
   return (
-    <View style={{ flex: 1, backgroundColor: '#db0000ff' }} edges={['bottom']}>
       <Tab.Navigator
         screenOptions={{
           headerShown: false,
+          tabBarHideOnKeyboard: true,
           tabBarShowLabel: false,
           tabBarStyle: {
             backgroundColor: '#db0000ff', // General bar color
@@ -68,7 +68,6 @@ export default function BottomTab() {
         }} />
 
       </Tab.Navigator>
-    </View>
   );
 }
 

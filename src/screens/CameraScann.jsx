@@ -3,19 +3,20 @@ import {
   StyleSheet,
   Text,
   View,
-  SafeAreaView,
   Dimensions,
   Linking,
   StatusBar,
   ScrollView,
   ActivityIndicator,
-  TouchableOpacity, 
-  Modal, 
-  Alert, 
-  // NEW: Import TextInput and Image
+  TouchableOpacity,
+  Modal,
+  Alert,
   TextInput,
   Image,
+  KeyboardAvoidingView,
+  Platform
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import {
   Camera,
   useCameraDevice,
@@ -47,7 +48,7 @@ export default function CameraScann({ onGoBack }) {
   // --- State Variables ---
   const [scannedData, setScannedData] = useState(null);
   const [isInitialized, setIsInitialized] = useState(false);
-  const [isConfirmModalVisible, setIsConfirmModalVisible] = useState(false); 
+  const [isConfirmModalVisible, setIsConfirmModalVisible] = useState(false);
   const [showDetailsModal, setShowDetailsModal] = useState(false);
   const [couponData, setCouponData] = useState(null);
   const [isApiLoading, setIsApiLoading] = useState(false); // For getDetails
@@ -89,8 +90,8 @@ export default function CameraScann({ onGoBack }) {
       return;
     }
 
-    const { 
-      discount: discountValue, 
+    const {
+      discount: discountValue,
       discount_type: discountType,
       amount_min: minAmount,
       amount_max: maxAmount
@@ -114,9 +115,9 @@ export default function CameraScann({ onGoBack }) {
   const resetScan = useCallback(() => {
     setScannedData(null);
     lastScannedValueRef.current = null;
-    setIsScanActive(true); 
-    setError(null); 
-    setCouponData(null); 
+    setIsScanActive(true);
+    setError(null);
+    setCouponData(null);
     // NEW: Reset details state
     setInvoiceAmount('');
     setNotes('');
@@ -125,29 +126,29 @@ export default function CameraScann({ onGoBack }) {
 
   // API Call Function 1: Get Details (unchanged)
   const handleGetCouponDetails = useCallback(async (couponCode) => {
-    setIsApiLoading(true); 
+    setIsApiLoading(true);
     setError(null);
     try {
       const response = await getCuponDetails(couponCode);
       const data = response.data;
-      if (data.status_code >= 400 || data.success === false) { 
+      if (data.status_code >= 400 || data.success === false) {
         throw new Error(data.status_message || data.errors?.[0]?.title || 'Coupon validation failed.');
       }
-      setCouponData(data); 
-      setIsConfirmModalVisible(false); 
+      setCouponData(data);
+      setIsConfirmModalVisible(false);
       setShowDetailsModal(true); // Show the new details modal
     } catch (err) {
       console.error('API GetDetails Error:', err);
-      setIsConfirmModalVisible(false); 
+      setIsConfirmModalVisible(false);
       let message = err.message || 'Network error occurred.';
       if (err.response) {
         const errorData = err.response.data;
         message = errorData.status_message || errorData.errors?.[0]?.title || `Server Error (${err.response.status}).`;
       }
       setError(message);
-      setTimeout(resetScan, 3000); 
+      setTimeout(resetScan, 3000);
     } finally {
-      setIsApiLoading(false); 
+      setIsApiLoading(false);
     }
   }, [resetScan]);
 
@@ -161,7 +162,7 @@ export default function CameraScann({ onGoBack }) {
     setIsRedeeming(true);
     try {
       const response = await redeemCoupon(scannedData, invoiceAmount, notes);
-      
+
       if (response.data && response.data.status_code === 200) {
         alert('Kuponi u konsumua me sukses!');
         setShowDetailsModal(false); // Close the details modal
@@ -185,7 +186,7 @@ export default function CameraScann({ onGoBack }) {
       if (value && value !== lastScannedValueRef.current) {
         lastScannedValueRef.current = value;
         setScannedData(value);
-        setIsScanActive(false); 
+        setIsScanActive(false);
         setIsConfirmModalVisible(true);
       }
     }
@@ -203,7 +204,7 @@ export default function CameraScann({ onGoBack }) {
       transparent={true}
       visible={isConfirmModalVisible}
       onRequestClose={() => {
-        setIsConfirmModalVisible(false); 
+        setIsConfirmModalVisible(false);
         resetScan();
       }}
     >
@@ -221,7 +222,7 @@ export default function CameraScann({ onGoBack }) {
               <TouchableOpacity
                 style={[styles.modalButton, styles.cancelButton]}
                 onPress={() => {
-                  setIsConfirmModalVisible(false); 
+                  setIsConfirmModalVisible(false);
                   resetScan();
                 }}
               >
@@ -243,7 +244,7 @@ export default function CameraScann({ onGoBack }) {
   // --- RENDERING LOGIC ---
   const isCameraReady = hasPermission === true && device != null && isInitialized;
   if (hasPermission === null || hasPermission === undefined || !isCameraReady) {
-     if (hasPermission === false) {
+    if (hasPermission === false) {
       // ... (permission required JSX - unchanged)
       return (
         <SafeAreaView style={[styles.container, styles.center]}>
@@ -253,7 +254,7 @@ export default function CameraScann({ onGoBack }) {
           </Text>
         </SafeAreaView>
       );
-     }
+    }
     // ... (initializing camera JSX - unchanged)
     return (
       <SafeAreaView style={[styles.container, styles.center]}>
@@ -265,7 +266,7 @@ export default function CameraScann({ onGoBack }) {
 
   // --- Main Component Render ---
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView style={styles.container} edges={['bottom', 'left', 'right']}>
       <StatusBar barStyle="light-content" />
 
       {/* Camera View (unchanged) */}
@@ -273,7 +274,7 @@ export default function CameraScann({ onGoBack }) {
         <Camera
           style={StyleSheet.absoluteFill}
           device={device}
-          isActive={isScanActive} 
+          isActive={isScanActive}
           codeScanner={codeScanner}
           enableZoomGesture={false}
         />
@@ -317,78 +318,82 @@ export default function CameraScann({ onGoBack }) {
 
       {/* NEW: CuponDetails Modal (Rebuilt) */}
       <Modal
-          transparent={true}
-          visible={showDetailsModal}
-          onRequestClose={() => {
-            setShowDetailsModal(false);
-            resetScan();
-          }}
-        >
-          <View style={styles.detailsModalContainer}>
-            {/* This ScrollView is important in case the keyboard
+        transparent={true}
+        visible={showDetailsModal}
+        onRequestClose={() => {
+          setShowDetailsModal(false);
+          resetScan();
+        }}
+      >
+        <KeyboardAvoidingView
+          // This behavior prop is important
+          behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+          // You can move the container style here
+          style={styles.detailsModalContainer}
+        >            {/* This ScrollView is important in case the keyboard
               covers the inputs in the modal.
             */}
-            <ScrollView style={{width: '100%'}}> 
-              {/* This is the JSX from CuponDetails, adapted for this modal */}
-              <View style={styles.detailsTitleView}>
-                <Image source={require('../assets/icons/sm_promocioni.png')} style={styles.detailsIcon} />
-                <Text style={styles.detailsTitle}>Promocioni</Text>
-              </View>
-              <View style={styles.detailsInfo}>
-                <Text style={styles.detailsText}>{couponData?.data?.product?.product}</Text>
-              </View>
+          <ScrollView style={{ width: '100%' }}>
+            {/* This is the JSX from CuponDetails, adapted for this modal */}
+            <View style={styles.detailsTitleView}>
+              <Image source={require('../assets/icons/sm_promocioni.png')} style={styles.detailsIcon} />
+              <Text style={styles.detailsTitle}>Promocioni</Text>
+            </View>
+            <View style={styles.detailsInfo}>
+              <Text style={styles.detailsText}>{couponData?.data?.product?.product}</Text>
+            </View>
 
-              <View style={styles.detailsTitleView}>
-                <Image source={require('../assets/icons/sm_produkti.png')} style={styles.detailsIcon} />
-                <Text style={styles.detailsTitle}>Shënim (Opsional)</Text>
-              </View>
-              <View>
-                <TextInput 
-                  style={styles.detailsInput} 
-                  onChangeText={setNotes}
-                  value={notes}
-                  placeholder="Shkruani një shënim..."
-                />
-              </View>
+            <View style={styles.detailsTitleView}>
+              <Image source={require('../assets/icons/sm_produkti.png')} style={styles.detailsIcon} />
+              <Text style={styles.detailsTitle}>Shënim (Opsional)</Text>
+            </View>
+            <View>
+              <TextInput
+                style={styles.detailsInput}
+                onChangeText={setNotes}
+                value={notes}
+                placeholder="Shkruani një shënim..."
+              />
+            </View>
 
-              <View style={styles.detailsTitleView}>
-                <Image source={require('../assets/icons/sm_fatura.png')} style={styles.detailsIcon} />
-                <Text style={styles.detailsTitle}>Vlera e Faturës</Text>
-              </View>
-              <View>
-                <TextInput 
-                  style={styles.detailsInput} 
-                  onChangeText={setInvoiceAmount} 
-                  value={invoiceAmount}
-                  placeholder="Shkruani vlerën"
-                  keyboardType="numeric"
-                />
-              </View>
+            <View style={styles.detailsTitleView}>
+              <Image source={require('../assets/icons/sm_fatura.png')} style={styles.detailsIcon} />
+              <Text style={styles.detailsTitle}>Vlera e Faturës</Text>
+            </View>
+            <View>
+              <TextInput
+                style={styles.detailsInput}
+                onChangeText={setInvoiceAmount}
+                value={invoiceAmount}
+                placeholder="Shkruani vlerën"
+                keyboardType="numeric"
+              />
+            </View>
 
-              <View style={styles.detailsTitleView}>
-                <Image source={require('../assets/icons/sm_ulja.png')} style={styles.detailsIcon} />
-                <Text style={styles.detailsTitle}>Vlera e uljes</Text>
-              </View>
-              <View>
-                <Text style={[styles.detailsInput, { paddingVertical: 10 }]}>{discountedPrice}</Text>
-              </View>
+            <View style={styles.detailsTitleView}>
+              <Image source={require('../assets/icons/sm_ulja.png')} style={styles.detailsIcon} />
+              <Text style={styles.detailsTitle}>Vlera e uljes</Text>
+            </View>
+            <View>
+              <Text style={[styles.detailsInput, { paddingVertical: 10 }]}>{discountedPrice}</Text>
+            </View>
 
-              <View style={styles.detailsButtonContainer}>
-                <TouchableOpacity 
-                  onPress={handleRedeemPress} 
-                  style={styles.detailsButton}
-                  disabled={isRedeeming}
-                >
-                  {isRedeeming ? (
-                    <ActivityIndicator color="#fff" />
-                  ) : (
-                    <Text style={{ color: '#fff', fontSize: 16 }}>Konsumo</Text>
-                  )}
-                </TouchableOpacity>
-              </View>
-            </ScrollView>
-          </View>
-        </Modal>
+            <View style={styles.detailsButtonContainer}>
+              <TouchableOpacity
+                onPress={handleRedeemPress}
+                style={styles.detailsButton}
+                disabled={isRedeeming}
+              >
+                {isRedeeming ? (
+                  <ActivityIndicator color="#fff" />
+                ) : (
+                  <Text style={{ color: '#fff', fontSize: 16 }}>Konsumo</Text>
+                )}
+              </TouchableOpacity>
+            </View>
+          </ScrollView>
+        </KeyboardAvoidingView>
+      </Modal>
     </SafeAreaView>
   );
 }
@@ -443,7 +448,7 @@ const styles = StyleSheet.create({
   },
   guideTextContainer: {
     position: 'absolute',
-    top: SCANNER_SIZE + height / 5, 
+    top: SCANNER_SIZE + height / 5,
     paddingHorizontal: 20,
   },
   guideText: {
@@ -531,7 +536,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#4CAF50',
   },
   cancelButton: {
-    backgroundColor: '#FF6F61', 
+    backgroundColor: '#FF6F61',
   },
   buttonText: {
     color: '#FFFFFF',
@@ -589,7 +594,7 @@ const styles = StyleSheet.create({
   detailsText: {
     fontSize: 15,
     marginVertical: 5,
-    paddingVertical: 10, 
+    paddingVertical: 10,
     paddingLeft: 30
   },
   detailsButtonContainer: {
@@ -615,7 +620,7 @@ const styles = StyleSheet.create({
   detailsInput: {
     backgroundColor: '#ffffffff',
     paddingLeft: 30,
-    height: 40, 
+    height: 40,
     justifyContent: 'center',
   },
 

@@ -15,6 +15,7 @@ import BottomTab from './src/components/BottomTab';
 import CameraScann from './src/screens/CameraScann';
 // Import your AuthProvider and useAuth hook
 import { AuthProvider, useAuth } from './src/context/AuthContext';
+import { SafeAreaProvider } from 'react-native-safe-area-context';
 
 const Stack = createNativeStackNavigator();
 
@@ -36,17 +37,17 @@ const AppNavigator = () => {
     <Stack.Navigator>
       {userToken == null ? (
         // No token, show only Login
-        <Stack.Screen 
-          name="Login" 
-          component={LoginScreen} 
+        <Stack.Screen
+          name="Login"
+          component={LoginScreen}
           options={{ headerShown: false }} // Hide header for login
         />
       ) : (
         // User is logged in, show the main app with BottomTab
         <>
-          <Stack.Screen 
-            name="Main" 
-            component={BottomTab} 
+          <Stack.Screen
+            name="Main"
+            component={BottomTab}
             options={{ headerShown: false }} // Hide header for tab navigator
           />
           {/* You can add other screens here that are part of the logged-in stack */}
@@ -65,10 +66,13 @@ const AppNavigator = () => {
 export default function App() {
   return (
     // Wrap the entire app in the AuthProvider
-    <AuthProvider>
-      <NavigationContainer>
-        <AppNavigator />
-      </NavigationContainer>
-    </AuthProvider>
+    <SafeAreaProvider>
+      <AuthProvider>
+        <NavigationContainer>
+          <AppNavigator />
+
+        </NavigationContainer>
+      </AuthProvider>
+    </SafeAreaProvider>
   );
 }

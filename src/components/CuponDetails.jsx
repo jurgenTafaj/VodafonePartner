@@ -207,7 +207,8 @@ const styles = StyleSheet.create({
   },
   buttonContainer: {
     flexDirection: 'row',
-    marginHorizontal: 5
+    width: '100%',
+    justifyContent: 'space-between',
   },
   button: {
     backgroundColor: '#242739ff',
@@ -215,8 +216,7 @@ const styles = StyleSheet.create({
     paddingVertical: 12,
     borderRadius: 30,
     width: 150,
-    alignItems: 'center',
-    marginHorizontal: 25
+    alignItems: 'center'
   },
   icon: {
     height: 30,

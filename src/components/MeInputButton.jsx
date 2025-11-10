@@ -84,9 +84,9 @@ const MeInputButton = ({ onClose, setHeaderProps, onSubmit }) => {
           {loading ? (
             <ActivityIndicator size="large" color="#0000ff" />
           ) : (
-            <View style={{ marginTop: 150, marginHorizontal: 100 }}>
+            <View style={{ marginTop: 50, marginHorizontal: 100 }}>
               <TouchableOpacity style={styles.button} onPress={handleRedeem}>
-                <Text style={{ color: '#fff', fontSize: 18, textAlign: 'center' }}>Dërgggo</Text>
+                <Text style={{ color: '#fff', fontSize: 18, textAlign: 'center' }}>Dërgo</Text>
               </TouchableOpacity>
             </View>
           )}
