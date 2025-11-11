@@ -95,8 +95,6 @@ export default function BottomTab() {
             elevation: 5,
             height: 45,
           },
-          tabBarActiveBackgroundColor: '#c10303ff',
-          tabBarInactiveBackgroundColor: '#db0000ff',
         }}
       >
         <Tab.Screen
@@ -104,9 +102,10 @@ export default function BottomTab() {
           component={HomeScreen}
           options={{
             tabBarIcon: ({ focused }) => (
+
               <Image
                 source={require('../assets/icons/menu_home.png')}
-                style={styles.icon}
+                style={[styles.icon, { tintColor: focused ? '#fff' : '#734040ff' }]}
               />
             ),
           }}
@@ -119,7 +118,7 @@ export default function BottomTab() {
             tabBarIcon: ({ focused }) => (
               <Image
                 source={require('../assets/icons/menu_raport.png')}
-                style={styles.icon}
+                style={[styles.icon, { tintColor: focused ? '#fff' : '#734040ff' }]}
               />
             ),
           }}
@@ -132,7 +131,7 @@ export default function BottomTab() {
             tabBarIcon: ({ focused }) => (
               <Image
                 source={require('../assets/icons/menu_settings.png')}
-                style={styles.icon}
+                style={[styles.icon, { tintColor: focused ? '#fff' : '#734040ff' }]}
               />
             ),
           }}
@@ -145,7 +144,7 @@ export default function BottomTab() {
             tabBarIcon: ({ focused }) => (
               <Image
                 source={require('../assets/icons/logout_red.png')}
-                style={styles.icon}
+                style={[styles.icon, { tintColor: focused ? '#fff' : '#734040ff' }]}
               />
             ),
           }}
@@ -159,9 +158,10 @@ export default function BottomTab() {
 const styles = StyleSheet.create({
   icon: {
     width: 35,
-    height: 35,
+    height: 37,
     tintColor: '#ffffff',
-    //
-    resizeMode: 'contain',
+    paddingTop: 20,
+    paddingHorizontal: 20,
+    //resizeMode: 'contain',
   },
 });

@@ -73,7 +73,7 @@ const MeInputButton = ({ onClose, setHeaderProps, onSubmit }) => {
             <Image source={require('../assets/icons/input_icon.png')} style={styles.icon} />
           </View>
 
-          <Text style={{ fontSize: 16, paddingVertical: 30, paddingHorizontal: 120 }}>Shkruaj kodin e kuponit</Text>
+          <Text style={{ fontSize: 16, paddingVertical: 30, paddingHorizontal: 10 }}>Shkruaj kodin e kuponit</Text>
 
           <View style={{ marginHorizontal: 50 }}>
             <TextInput value={inputValue} onChangeText={handleChangeText} style={styles.input} keyboardType="numeric" />
