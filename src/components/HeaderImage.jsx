@@ -26,10 +26,8 @@ const HeaderImage = ({ text1, imageURL, text2 }) => {
 
   return (
     <>
-      {/* --- 1. CHANGE THIS LINE --- */}
-      <View style={{ zIndex: 10 }}> 
-      {/* REMOVED flex: 1 */}
-      
+      <View style={{ zIndex: 10 }}>
+
         <ImageBackground
           source={require('../assets/pictures/small_wave.png')}
           style={styles.background}
@@ -55,8 +53,6 @@ const styles = StyleSheet.create({
     marginTop: 25,
   },
   background: {
-    // --- 2. CHANGE THIS LINE ---
-    // REMOVED flex: 1
     height: 200
   },
   imageHeader: {
@@ -76,7 +72,6 @@ const styles = StyleSheet.create({
     height: 100,
     marginHorizontal: 200,
     marginTop: -30,
-    //position: 'absolute',
   }
 })
 

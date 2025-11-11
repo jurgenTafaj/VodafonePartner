@@ -25,11 +25,9 @@ import {
 } from 'react-native-vision-camera';
 import { redeemCoupon, getCuponDetails } from '../api/authService';
 
-// NEW: Removed CuponDetails import
 
 const { width, height } = Dimensions.get('window');
 
-// Debounce function (unchanged)
 const debounce = (func, delay) => {
   let timeout;
   return (...args) => {
@@ -38,32 +36,28 @@ const debounce = (func, delay) => {
   };
 };
 
-// --- Main App Component ---
 export default function CameraScann({ onGoBack }) {
   const {
     hasPermission,
     requestPermission
   } = useCameraPermission();
 
-  // --- State Variables ---
   const [scannedData, setScannedData] = useState(null);
   const [isInitialized, setIsInitialized] = useState(false);
   const [isConfirmModalVisible, setIsConfirmModalVisible] = useState(false);
   const [showDetailsModal, setShowDetailsModal] = useState(false);
   const [couponData, setCouponData] = useState(null);
-  const [isApiLoading, setIsApiLoading] = useState(false); // For getDetails
+  const [isApiLoading, setIsApiLoading] = useState(false);
   const [error, setError] = useState(null);
   const [isScanActive, setIsScanActive] = useState(true);
 
-  // NEW: State for the details modal (from CuponDetails)
   const [invoiceAmount, setInvoiceAmount] = useState('');
-  const [notes, setNotes] = useState(''); // Added notes field
+  const [notes, setNotes] = useState('');
   const [discountedPrice, setDiscountedPrice] = useState('0.00');
-  const [isRedeeming, setIsRedeeming] = useState(false); // For redeemCoupon
+  const [isRedeeming, setIsRedeeming] = useState(false);
 
   const device = useCameraDevice('back');
 
-  // Request Camera Permissions (unchanged)
   useEffect(() => {
     const checkAndRequestPermission = async () => {
       if (hasPermission === false) {
@@ -78,8 +72,6 @@ export default function CameraScann({ onGoBack }) {
     checkAndRequestPermission();
   }, [hasPermission, requestPermission]);
 
-  // NEW: useEffect to calculate discount (from CuponDetails)
-  // This runs whenever the invoice amount or coupon data changes
   useEffect(() => {
     const productDetails = couponData?.data?.product;
     if (!productDetails) return;
@@ -106,25 +98,22 @@ export default function CameraScann({ onGoBack }) {
       }
     }
     setDiscountedPrice(calculatedDiscount.toFixed(2));
-  }, [invoiceAmount, couponData]); // Dependencies
+  }, [invoiceAmount, couponData]);
 
 
   const lastScannedValueRef = useRef(null);
 
-  // Reset scan state
   const resetScan = useCallback(() => {
     setScannedData(null);
     lastScannedValueRef.current = null;
     setIsScanActive(true);
     setError(null);
     setCouponData(null);
-    // NEW: Reset details state
     setInvoiceAmount('');
     setNotes('');
     setDiscountedPrice('0.00');
   }, []);
 
-  // API Call Function 1: Get Details (unchanged)
   const handleGetCouponDetails = useCallback(async (couponCode) => {
     setIsApiLoading(true);
     setError(null);
@@ -136,7 +125,7 @@ export default function CameraScann({ onGoBack }) {
       }
       setCouponData(data);
       setIsConfirmModalVisible(false);
-      setShowDetailsModal(true); // Show the new details modal
+      setShowDetailsModal(true);
     } catch (err) {
       console.error('API GetDetails Error:', err);
       setIsConfirmModalVisible(false);
@@ -152,7 +141,6 @@ export default function CameraScann({ onGoBack }) {
     }
   }, [resetScan]);
 
-  // NEW: API Call Function 2: Redeem Coupon (from CuponDetails)
   const handleRedeemPress = async () => {
     if (!invoiceAmount || parseFloat(invoiceAmount) <= 0) {
       alert('Ju lutem shkruani një vlerë të vlefshme për faturën.');
@@ -165,9 +153,9 @@ export default function CameraScann({ onGoBack }) {
 
       if (response.data && response.data.status_code === 200) {
         alert('Kuponi u konsumua me sukses!');
-        setShowDetailsModal(false); // Close the details modal
-        resetScan(); // Reset scanner
-        if (onGoBack) onGoBack(); // Navigate back
+        setShowDetailsModal(false);
+        resetScan();
+        if (onGoBack) onGoBack();
       } else {
         alert(response.data.status_message || 'Gabim gjatë konsumimit të kuponit.');
       }
@@ -179,7 +167,6 @@ export default function CameraScann({ onGoBack }) {
     }
   };
 
-  // handleCodeScanned (unchanged)
   const handleCodeScanned = useCallback((codes) => {
     if (codes.length > 0) {
       const value = codes[0].value;
@@ -197,7 +184,6 @@ export default function CameraScann({ onGoBack }) {
     onCodeScanned: handleCodeScanned,
   });
 
-  // Confirmation Modal Component (unchanged)
   const ConfirmationModal = () => (
     <Modal
       animationType="fade"
@@ -241,11 +227,9 @@ export default function CameraScann({ onGoBack }) {
     </Modal>
   );
 
-  // --- RENDERING LOGIC ---
   const isCameraReady = hasPermission === true && device != null && isInitialized;
   if (hasPermission === null || hasPermission === undefined || !isCameraReady) {
     if (hasPermission === false) {
-      // ... (permission required JSX - unchanged)
       return (
         <SafeAreaView style={[styles.container, styles.center]}>
           <Text style={styles.permissionText}>Camera Access Required</Text>
@@ -255,7 +239,6 @@ export default function CameraScann({ onGoBack }) {
         </SafeAreaView>
       );
     }
-    // ... (initializing camera JSX - unchanged)
     return (
       <SafeAreaView style={[styles.container, styles.center]}>
         <ActivityIndicator size="large" color="#4CAF50" />
@@ -264,12 +247,10 @@ export default function CameraScann({ onGoBack }) {
     );
   }
 
-  // --- Main Component Render ---
   return (
     <SafeAreaView style={styles.container} edges={['bottom', 'left', 'right']}>
       <StatusBar barStyle="light-content" />
 
-      {/* Camera View (unchanged) */}
       <View style={styles.cameraContainer}>
         <Camera
           style={StyleSheet.absoluteFill}
@@ -290,7 +271,6 @@ export default function CameraScann({ onGoBack }) {
         </View>
       </View>
 
-      {/* Result Display Panel (unchanged) */}
       <View style={styles.resultPanel}>
         {error && (
           <View style={styles.errorBox}>
@@ -313,10 +293,8 @@ export default function CameraScann({ onGoBack }) {
         </TouchableOpacity>
       </View>
 
-      {/* Confirmation Modal (unchanged) */}
       <ConfirmationModal />
 
-      {/* NEW: CuponDetails Modal (Rebuilt) */}
       <Modal
         transparent={true}
         visible={showDetailsModal}
@@ -326,15 +304,11 @@ export default function CameraScann({ onGoBack }) {
         }}
       >
         <KeyboardAvoidingView
-          // This behavior prop is important
           behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-          // You can move the container style here
           style={styles.detailsModalContainer}
-        >            {/* This ScrollView is important in case the keyboard
-              covers the inputs in the modal.
-            */}
+        >
           <ScrollView style={{ width: '100%' }}>
-            {/* This is the JSX from CuponDetails, adapted for this modal */}
+
             <View style={styles.detailsTitleView}>
               <Image source={require('../assets/icons/sm_promocioni.png')} style={styles.detailsIcon} />
               <Text style={styles.detailsTitle}>Promocioni</Text>
@@ -398,7 +372,6 @@ export default function CameraScann({ onGoBack }) {
   );
 }
 
-// --- STYLESHEETS ---
 const SCANNER_SIZE = width * 0.7;
 
 const styles = StyleSheet.create({
@@ -416,7 +389,6 @@ const styles = StyleSheet.create({
     color: '#E0E0E0',
     marginBottom: 10,
   },
-  // ... (all original scanner styles: permissionSubText, linkText, cameraContainer, overlay, etc.)
   permissionSubText: {
     fontSize: 16,
     color: '#B0B0B0',
@@ -569,13 +541,12 @@ const styles = StyleSheet.create({
     fontWeight: '700',
   },
 
-  // --- NEW: Styles merged from CuponDetails ---
   detailsModalContainer: {
-    marginTop: 200, // Adjusted margin to be more centered
+    marginTop: 200,
     marginHorizontal: 10,
     backgroundColor: '#e5e5e5ff',
-    height: 'auto', // Auto height
-    maxHeight: '70%', // Max height
+    height: 'auto',
+    maxHeight: '70%',
     borderRadius: 20,
     padding: 15,
   },
@@ -588,7 +559,7 @@ const styles = StyleSheet.create({
   detailsTitle: {
     fontSize: 16,
     fontWeight: 'bold',
-    marginLeft: 5, // Spacing from icon
+    marginLeft: 5,
     alignSelf: 'center',
   },
   detailsText: {
@@ -600,7 +571,7 @@ const styles = StyleSheet.create({
   detailsButtonContainer: {
     alignItems: 'center',
     marginTop: 30,
-    marginBottom: 20, // Add bottom margin
+    marginBottom: 20,
   },
   detailsButton: {
     backgroundColor: '#242739ff',

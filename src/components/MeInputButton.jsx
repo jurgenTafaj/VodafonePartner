@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 import {
   View, Text, TouchableOpacity, Image, StyleSheet, TextInput,
   ActivityIndicator, useWindowDimensions,
-  // --- Make sure these are imported ---
   KeyboardAvoidingView,
   Platform,
   ScrollView
@@ -10,7 +9,6 @@ import {
 import { getCuponDetails } from '../api/authService';
 import CustomAlert from './CustomAlert';
 
-// Props are from HomeScreen: onClose, setHeaderProps, onSubmit
 const MeInputButton = ({ onClose, setHeaderProps, onSubmit }) => {
 
   const [inputValue, setInputValue] = useState('');
@@ -59,12 +57,11 @@ const MeInputButton = ({ onClose, setHeaderProps, onSubmit }) => {
 
   return (
     <>
-      {/* Use KeyboardAvoidingView to handle the keyboard */}
       <KeyboardAvoidingView
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-        style={styles.container} // This is the new flex: 1 container
+        style={styles.container}
       >
-        <ScrollView 
+        <ScrollView
           contentContainerStyle={styles.scrollContent}
           keyboardShouldPersistTaps="handled"
         >
@@ -104,20 +101,16 @@ const MeInputButton = ({ onClose, setHeaderProps, onSubmit }) => {
 }
 
 const styles = StyleSheet.create({
-  // --- THIS IS THE MAIN FIX ---
   container: {
-    flex: 1, // It now fills the parent View in HomeScreen
+    flex: 1,
     backgroundColor: '#e5e5e5ff'
-    // REMOVED: position: 'absolute'
-    // REMOVED: height: 550
-    // REMOVED: marginTop: 220
+
   },
   scrollContent: {
-    alignItems: 'center', // Center content
-    paddingVertical: 60, // Add padding here instead
-    paddingBottom: 100, // Extra space for scrolling
+    alignItems: 'center',
+    paddingVertical: 60,
+    paddingBottom: 100,
   },
-  // --- All other styles are the same ---
   input: {
     backgroundColor: '#fff',
     width: 300,

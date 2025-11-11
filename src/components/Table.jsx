@@ -12,9 +12,9 @@ const Table = ({ coupon, invoice_amount, discount, added, product, addedDate, ad
         </TouchableOpacity>
 
         <View style={{ flexDirection: 'row' }}>
-          <Text style={{ paddingHorizontal: 10, marginVertical: 5 }}>{addedTime}</Text>{/*time from the added prop*/}
+          <Text style={{ paddingHorizontal: 10, marginVertical: 5 }}>{addedTime}</Text>
           <Text style={{ color: '#f40000ff', marginVertical: 5 }}>|</Text>
-          <Text style={{ paddingHorizontal: 10, marginVertical: 5 }}>{addedDate}</Text>{/*date from the added prop*/}
+          <Text style={{ paddingHorizontal: 10, marginVertical: 5 }}>{addedDate}</Text>
         </View>
 
       </View>
@@ -32,7 +32,7 @@ const Table = ({ coupon, invoice_amount, discount, added, product, addedDate, ad
         </View>
         <View style={[styles.line3]}>
           <Image source={require('../assets/icons/sm_produkti.png')} style={styles.icon} />
-          <Text style={{ marginTop: 5, color: '#f00505ff' }}>{product}</Text>
+          <Text style={{ marginTop: 5, color: '#f00505ff', fontSize: 12 }}>{product}</Text>
         </View>
       </View>
     </>
@@ -41,7 +41,6 @@ const Table = ({ coupon, invoice_amount, discount, added, product, addedDate, ad
 
 const styles = StyleSheet.create({
   component: {
-    //marginVertical: 20
   },
   lines: {
     backgroundColor: '#ffffffff',
@@ -54,15 +53,15 @@ const styles = StyleSheet.create({
   line3: {
     backgroundColor: '#ffffffff',
     flexDirection: 'row',
-    //borderBottomWidth: 1,
-
+    paddingLeft: 0,
+    //flexWrap: 'wrap'
   },
   component: {
   },
   icon: {
     height: 30,
     width: 30,
-    marginLeft: 20
+    //marginLeft: 15
   },
   line: {
     marginHorizontal: 40,

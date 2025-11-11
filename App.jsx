@@ -19,11 +19,9 @@ import { SafeAreaProvider } from 'react-native-safe-area-context';
 
 const Stack = createNativeStackNavigator();
 
-// Create a new component for your navigation logic
 const AppNavigator = () => {
   const { userToken, isLoading } = useAuth();
 
-  // Show a loading spinner while checking for token
   if (isLoading) {
     return (
       <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
@@ -32,25 +30,21 @@ const AppNavigator = () => {
     );
   }
 
-  // Choose the navigator based on userToken
   return (
     <Stack.Navigator>
       {userToken == null ? (
-        // No token, show only Login
         <Stack.Screen
           name="Login"
           component={LoginScreen}
-          options={{ headerShown: false }} // Hide header for login
+          options={{ headerShown: false }}
         />
       ) : (
-        // User is logged in, show the main app with BottomTab
         <>
           <Stack.Screen
             name="Main"
             component={BottomTab}
-            options={{ headerShown: false }} // Hide header for tab navigator
+            options={{ headerShown: false }}
           />
-          {/* You can add other screens here that are part of the logged-in stack */}
           <Stack.Screen name="Home" component={HomeScreen} />
           <Stack.Screen name="Logout" component={LogoutScreen} />
           <Stack.Screen name="Settings" component={SettingsScreen} />
@@ -62,10 +56,8 @@ const AppNavigator = () => {
   );
 };
 
-// Your main App component
 export default function App() {
   return (
-    // Wrap the entire app in the AuthProvider
     <SafeAreaProvider>
       <AuthProvider>
         <NavigationContainer>

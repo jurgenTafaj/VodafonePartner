@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import {
   View, Text, TouchableOpacity, StyleSheet, Image, TextInput,
   useWindowDimensions, ActivityIndicator,
-  // --- Make sure these are imported ---
   KeyboardAvoidingView,
   Platform,
   ScrollView
@@ -11,7 +10,6 @@ import { redeemCoupon } from '../api/authService';
 import { useNavigation } from '@react-navigation/native';
 import CustomAlert from './CustomAlert';
 
-// Props are from HomeScreen: onClose, product, couponCode
 const CuponDetails = ({ onClose, product, couponCode }) => {
 
   const [value, setValue] = useState('');
@@ -20,8 +18,6 @@ const CuponDetails = ({ onClose, product, couponCode }) => {
   const [alertConfig, setAlertConfig] = useState({ visible: false, title: '', message: '' });
   const [discountedPrice, setDiscountedPrice] = useState('0.00');
 
-  // (All your functions: showAlert, useEffect, handleRedeem, backButton, handleAlertClose stay the same)
-  // ...
   const showAlert = (title, message) => {
     setAlertConfig({ visible: true, title, message });
   };
@@ -74,13 +70,11 @@ const CuponDetails = ({ onClose, product, couponCode }) => {
         showAlert('Sukses!', successMessage);
       } else {
         let apiErrorMessage = 'Ndodhi një gabim i panjohur.';
-        // ...your error logic
         setIsLoading(false);
         showAlert('Gabim', apiErrorMessage);
       }
     } catch (err) {
       setIsLoading(false);
-      // ...your catch logic
       showAlert('Gabim', 'Ndodhi një gabim i panjohur.');
     }
   };
@@ -88,7 +82,7 @@ const CuponDetails = ({ onClose, product, couponCode }) => {
   const backButton = () => {
     setNotes('');
     setValue('');
-    onClose(); 
+    onClose();
   }
 
   const handleAlertClose = () => {
@@ -104,14 +98,13 @@ const CuponDetails = ({ onClose, product, couponCode }) => {
     <>
       <KeyboardAvoidingView
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-        style={styles.container} // This is the new flex: 1 container
+        style={styles.container}
       >
-        <ScrollView 
+        <ScrollView
           contentContainerStyle={styles.scrollContent}
           keyboardShouldPersistTaps="handled"
         >
 
-          {/* All your existing form content stays the same */}
           <View style={styles.title}>
             <Image source={require('../assets/icons/sm_promocioni.png')} style={styles.icon} />
             <Text style={styles.title}>Promocioni</Text>
@@ -119,7 +112,7 @@ const CuponDetails = ({ onClose, product, couponCode }) => {
           <View style={styles.info}>
             <Text style={styles.text}>{product?.data?.product?.product}</Text>
           </View>
-          
+
           <View style={styles.title}>
             <Image source={require('../assets/icons/sm_produkti.png')} style={styles.icon} />
             <Text style={styles.title}>Produkti</Text>
@@ -151,7 +144,7 @@ const CuponDetails = ({ onClose, product, couponCode }) => {
           <View>
             <Text style={[styles.input]}>{discountedPrice}</Text>
           </View>
-          
+
           <View style={styles.buttonContainer}>
             <TouchableOpacity style={[styles.button, { backgroundColor: '#44444486' }]} onPress={backButton}>
               <Text style={{ color: '#fff', fontSize: 16, textAlign: 'center' }}>Back</Text>
@@ -179,20 +172,17 @@ const CuponDetails = ({ onClose, product, couponCode }) => {
 };
 
 const styles = StyleSheet.create({
-  // --- THIS IS THE MAIN FIX ---
+
   container: {
-    flex: 1, // It now fills the parent View in HomeScreen
+    flex: 1,
     backgroundColor: '#e5e5e5ff'
-    // REMOVED: position: 'absolute'
-    // REMOVED: height: 550
-    // REMOVED: marginTop: 220
+
   },
   scrollContent: {
     paddingVertical: 60,
     paddingHorizontal: 15,
-    paddingBottom: 100, // Extra space for scrolling
+    paddingBottom: 100,
   },
-  // --- All other styles are the same ---
   title: {
     flexDirection: 'row',
     fontSize: 16,

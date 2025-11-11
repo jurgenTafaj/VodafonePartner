@@ -1,21 +1,20 @@
 import React, { useState } from 'react';
-import { 
-  View, 
-  TextInput, 
-  Text, 
-  StyleSheet, 
-  ImageBackground, 
-  Image, 
-  TouchableOpacity, 
+import {
+  View,
+  TextInput,
+  Text,
+  StyleSheet,
+  ImageBackground,
+  Image,
+  TouchableOpacity,
   ActivityIndicator,
-  // NEW: Import components to handle the keyboard
   KeyboardAvoidingView,
   ScrollView,
   Platform,
   TouchableWithoutFeedback,
   Keyboard
 } from 'react-native';
-import { useAuth } from '../context/AuthContext'; // Import the hook
+import { useAuth } from '../context/AuthContext';
 
 const LoginScreen = () => {
 
@@ -26,7 +25,7 @@ const LoginScreen = () => {
   const [error, setError] = useState('');
   const [isLoggingIn, setIsLoggingIn] = useState(false);
 
-  const { signIn } = useAuth(); // Get the signIn function
+  const { signIn } = useAuth();
 
   const handleLogin = async () => {
     if (isLoggingIn) return;
@@ -43,17 +42,13 @@ const LoginScreen = () => {
   };
 
   return (
-    // NEW: Wrap entire screen in KeyboardAvoidingView
     <KeyboardAvoidingView
       style={{ flex: 1 }}
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
     >
-      {/* NEW: Wrap content in a ScrollView to allow scrolling when keyboard is up */}
       <ScrollView contentContainerStyle={styles.scrollContainer}>
-        {/* NEW: Allows user to tap outside inputs to dismiss keyboard */}
         <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-          {/* Use a wrapper View for the dismiss to work with ScrollView */}
-          <View> 
+          <View>
             <View style={styles.headerContainer}>
               <ImageBackground source={require('../assets/pictures/login_wave.png')}
                 style={styles.background}
@@ -65,7 +60,6 @@ const LoginScreen = () => {
               </ImageBackground>
             </View>
 
-            {/* This container holds your inputs */}
             <View style={styles.container}>
 
               <View style={{ flexDirection: 'row', backgroundColor: '#dfdfdfff', marginHorizontal: 100, marginBottom: 20, borderRadius: 50 }}>
@@ -112,9 +106,8 @@ const LoginScreen = () => {
 };
 
 const styles = StyleSheet.create({
-  // NEW: Style for the ScrollView's content
   scrollContainer: {
-    flexGrow: 1, // Ensures content can grow to fill space
+    flexGrow: 1,
   },
   container: {
     flex: 1,
@@ -150,17 +143,15 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     paddingLeft: 40,
     paddingRight: 10,
-    // NEW: Ensure input has flexible width
-    flex: 1, 
+    flex: 1,
   },
   icon: {
     position: 'absolute',
-    left: 10, 
+    left: 10,
     top: '50%',
-    transform: [{ translateY: -12 }], 
+    transform: [{ translateY: -12 }],
     width: 24,
     height: 24,
-    // NEW: Ensure icon stays on top
     zIndex: 1,
   },
   button: {
