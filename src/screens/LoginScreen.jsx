@@ -15,6 +15,7 @@ import {
   Keyboard
 } from 'react-native';
 import { useAuth } from '../context/AuthContext';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 const LoginScreen = () => {
 
@@ -42,66 +43,71 @@ const LoginScreen = () => {
   };
 
   return (
-    <KeyboardAvoidingView
-      style={{ flex: 1 }}
-      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-    >
-      <ScrollView contentContainerStyle={styles.scrollContainer}>
-        <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-          <View>
-            <View style={styles.headerContainer}>
-              <ImageBackground source={require('../assets/pictures/login_wave.png')}
-                style={styles.background}
-                resizeMode="stretch">
+    <SafeAreaView style={{ flex: 1, backgroundColor: '#fff' }} edges={['bottom']}>
 
-                <Text style={{ color: '#ffffffff', marginTop: 100, fontSize: 25, width: 250, marginHorizontal: 100, marginTop: 150 }}>Vodafone MORE Partners</Text>
-                <Image source={require('../assets/icons/logo_subjekt_default.png')} style={styles.logo1} />
-                <Image source={require('../assets/icons/p.png')} style={styles.logo2} />
-              </ImageBackground>
-            </View>
+      <KeyboardAvoidingView
+        style={{ flex: 1 }}
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+      >
+        <ScrollView contentContainerStyle={styles.scrollContainer}>
+          <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+            <View>
+              <View style={styles.headerContainer}>
+                <ImageBackground source={require('../assets/pictures/login_wave.png')}
+                  style={styles.background}
+                  resizeMode="stretch">
 
-            <View style={styles.container}>
+                  <Text style={{ color: '#ffffffff', marginTop: 100, fontSize: 25, width: 250, marginHorizontal: 100, marginTop: 150 }}>Vodafone MORE</Text>
+                  <Text style={{ color: '#ffffffff', fontSize: 25, width: 250, marginHorizontal: 100, marginLeft: 150 }}>Partners</Text>
 
-              <View style={{ flexDirection: 'row', backgroundColor: '#dfdfdfff', marginHorizontal: 100, marginBottom: 20, borderRadius: 50 }}>
-                <Image source={require('../assets/icons/sm_user.png')} style={styles.icon} />
-                <TextInput
-                  style={styles.input}
-                  placeholder="Username"
-                  value={username}
-                  onChangeText={setUsername}
-                  autoCapitalize="none"
-                />
+                  <Image source={require('../assets/icons/logo_subjekt_default.png')} style={styles.logo1} />
+                  <Image source={require('../assets/icons/p.png')} style={styles.logo2} />
+                </ImageBackground>
               </View>
 
-              <View style={{ flexDirection: 'row', backgroundColor: '#dfdfdfff', marginHorizontal: 100, borderRadius: 50, marginBottom: 20 }}  >
-                <Image source={require('../assets/icons/sm_lock.png')} style={styles.icon} />
-                <TextInput
-                  style={styles.input}
-                  placeholder="Password"
-                  value={password}
-                  onChangeText={setPassword}
-                  secureTextEntry
-                />
+              <View style={styles.container}>
+                <View style={{ flexDirection: 'row', backgroundColor: '#dfdfdfff', marginHorizontal: 100, marginBottom: 20, borderRadius: 50 }}>
+                  <Image source={require('../assets/icons/sm_user.png')} style={styles.icon} />
+                  <TextInput
+                    style={styles.input}
+                    placeholder="Username"
+                    value={username}
+                    onChangeText={setUsername}
+                    autoCapitalize="none"
+                  />
+                </View>
+
+                <View style={{ flexDirection: 'row', backgroundColor: '#dfdfdfff', marginHorizontal: 100, borderRadius: 50, marginBottom: 20 }}  >
+                  <Image source={require('../assets/icons/sm_lock.png')} style={styles.icon} />
+                  <TextInput
+                    style={styles.input}
+                    placeholder="Password"
+                    value={password}
+                    onChangeText={setPassword}
+                    secureTextEntry
+                  />
+                </View>
+
+                {error ? <Text style={styles.errorText}>{error}</Text> : null}
+
+                <TouchableOpacity
+                  onPress={handleLogin}
+                  disabled={isLoggingIn}
+                  style={[styles.button, isLoggingIn && styles.buttonDisabled]}
+                >
+                  {isLoggingIn ? (
+                    <ActivityIndicator color="#fff" />
+                  ) : (
+                    <Text style={styles.buttonText}>Hyr</Text>
+                  )}
+                </TouchableOpacity>
               </View>
-
-              {error ? <Text style={styles.errorText}>{error}</Text> : null}
-
-              <TouchableOpacity
-                onPress={handleLogin}
-                disabled={isLoggingIn}
-                style={[styles.button, isLoggingIn && styles.buttonDisabled]}
-              >
-                {isLoggingIn ? (
-                  <ActivityIndicator color="#fff" />
-                ) : (
-                  <Text style={styles.buttonText}>Hyr</Text>
-                )}
-              </TouchableOpacity>
             </View>
-          </View>
-        </TouchableWithoutFeedback>
-      </ScrollView>
-    </KeyboardAvoidingView>
+          </TouchableWithoutFeedback>
+        </ScrollView>
+      </KeyboardAvoidingView>
+    </SafeAreaView>
+
   );
 };
 
@@ -111,7 +117,7 @@ const styles = StyleSheet.create({
   },
   container: {
     flex: 1,
-    marginTop: 250
+    marginTop: 100
   },
   headerContainer: {
     position: 'relative',

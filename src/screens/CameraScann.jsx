@@ -1,3 +1,192 @@
+// import React, { useState, useEffect, useCallback, useRef } from 'react';
+// import {
+//   StyleSheet,
+//   Text,
+//   View,
+//   Dimensions,
+//   Linking,
+//   StatusBar,
+//   ScrollView,
+//   ActivityIndicator,
+//   TouchableOpacity,
+//   Modal,
+//   Alert,
+//   TextInput,
+//   Image,
+//   KeyboardAvoidingView,
+//   Platform
+// } from 'react-native';
+// import { SafeAreaView } from 'react-native-safe-area-context';
+// import {
+//   Camera,
+//   useCameraDevice,
+//   useCodeScanner,
+//   useCameraPermission,
+// } from 'react-native-vision-camera';
+// import { redeemCoupon, getCuponDetails } from '../api/authService';
+// import { useNavigation } from '@react-navigation/native';
+
+// const { width, height } = Dimensions.get('window');
+
+// const debounce = (func, delay) => {
+//   let timeout;
+//   return (...args) => {
+//     clearTimeout(timeout);
+//     timeout = setTimeout(() => func(...args), delay);
+//   };
+// };
+
+// export default function CameraScann({ onGoBack }) {
+//   const {
+//     hasPermission,
+//     requestPermission
+//   } = useCameraPermission();
+
+//   const [scannedData, setScannedData] = useState(null);
+//   const [isInitialized, setIsInitialized] = useState(false);
+//   const [isConfirmModalVisible, setIsConfirmModalVisible] = useState(false);
+//   const [showDetailsModal, setShowDetailsModal] = useState(false);
+//   const [couponData, setCouponData] = useState(null);
+//   const [isApiLoading, setIsApiLoading] = useState(false);
+//   const [error, setError] = useState(null);
+//   const [isScanActive, setIsScanActive] = useState(true);
+
+//   const [invoiceAmount, setInvoiceAmount] = useState('');
+//   const [notes, setNotes] = useState('');
+//   const [discountedPrice, setDiscountedPrice] = useState('0.00');
+//   const [isRedeeming, setIsRedeeming] = useState(false);
+
+//   const device = useCameraDevice('back');
+//   const navigation = useNavigation();
+
+
+//   useEffect(() => {
+//     const checkAndRequestPermission = async () => {
+//       if (hasPermission === false) {
+//         const granted = await requestPermission();
+//         if (granted) {
+//           setTimeout(() => setIsInitialized(true), 500);
+//         }
+//       } else if (hasPermission === true) {
+//         setIsInitialized(true);
+//       }
+//     };
+//     checkAndRequestPermission();
+//   }, [hasPermission, requestPermission]);
+
+//   useEffect(() => {
+//     const productDetails = couponData?.data?.product;
+//     if (!productDetails) return;
+
+//     const parsedInvoiceAmount = parseFloat(invoiceAmount);
+//     if (isNaN(parsedInvoiceAmount) || parsedInvoiceAmount <= 0) {
+//       setDiscountedPrice('0.00');
+//       return;
+//     }
+
+//     const {
+//       discount: discountValue,
+//       discount_type: discountType,
+//       amount_min: minAmount,
+//       amount_max: maxAmount
+//     } = productDetails;
+
+//     let calculatedDiscount = 0;
+//     if (parsedInvoiceAmount >= minAmount && parsedInvoiceAmount <= maxAmount) {
+//       if (discountType === 'percentage') {
+//         calculatedDiscount = (parsedInvoiceAmount * discountValue) / 100;
+//       } else if (discountType === 'static') {
+//         calculatedDiscount = Math.min(discountValue, parsedInvoiceAmount);
+//       }
+//     }
+//     setDiscountedPrice(calculatedDiscount.toFixed(2));
+//   }, [invoiceAmount, couponData]);
+
+
+//   const lastScannedValueRef = useRef(null);
+
+//   const resetScan = useCallback(() => {
+//     setScannedData(null);
+//     lastScannedValueRef.current = null;
+//     setIsScanActive(true);
+//     setError(null);
+//     setCouponData(null);
+//     setInvoiceAmount('');
+//     setNotes('');
+//     setDiscountedPrice('0.00');
+//   }, []);
+
+//   const handleGetCouponDetails = useCallback(async (couponCode) => {
+//     setIsApiLoading(true);
+//     setError(null);
+//     try {
+//       const response = await getCuponDetails(couponCode);
+//       const data = response.data;
+//       if (data.status_code >= 400 || data.success === false) {
+//         throw new Error(data.status_message || data.errors?.[0]?.title || 'Coupon validation failed.');
+//       }
+//       setCouponData(data);
+//       setIsConfirmModalVisible(false);
+//       setShowDetailsModal(true);
+//     } catch (err) {
+//       console.error('API GetDetails Error:', err);
+//       setIsConfirmModalVisible(false);
+//       let message = err.message || 'Network error occurred.';
+//       if (err.response) {
+//         const errorData = err.response.data;
+//         message = errorData.status_message || errorData.errors?.[0]?.title || `Server Error (${err.response.status}).`;
+//       }
+//       setError(message);
+//       setTimeout(resetScan, 3000);
+//     } finally {
+//       setIsApiLoading(false);
+//     }
+//   }, [resetScan]);
+
+//   const handleRedeemPress = async () => {
+//     if (!invoiceAmount || parseFloat(invoiceAmount) <= 0) {
+//       alert('Ju lutem shkruani një vlerë të vlefshme për faturën.');
+//       return;
+//     }
+
+//     setIsRedeeming(true);
+//     try {
+//       const response = await redeemCoupon(scannedData, invoiceAmount, notes);
+
+//       if (response.data && response.data.status_code === 200) {
+//         alert('Kuponi u konsumua me sukses!');
+//         setShowDetailsModal(false);
+//         resetScan();
+//         if (onGoBack) onGoBack();
+//       } else {
+//         alert(response.data.status_message || 'Gabim gjatë konsumimit të kuponit.');
+//       }
+//     } catch (error) {
+//       console.error("Redeem Error:", error);
+//       alert('Gabim i papritur: ' + error.message);
+//     } finally {
+//       setIsRedeeming(false);
+//     }
+//   };
+
+//   const handleCodeScanned = useCallback((codes) => {
+//     if (codes.length > 0) {
+//       const value = codes[0].value;
+//       if (value && value !== lastScannedValueRef.current) {
+//         lastScannedValueRef.current = value;
+//         setScannedData(value);
+//         setIsScanActive(false);
+//         setIsConfirmModalVisible(true);
+//       }
+//     }
+//   }, []);
+
+//   const codeScanner = useCodeScanner({
+//     codeTypes: ['qr'],
+//     onCodeScanned: handleCodeScanned,
+//   });
+
+
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import {
   StyleSheet,
@@ -10,7 +199,6 @@ import {
   ActivityIndicator,
   TouchableOpacity,
   Modal,
-  Alert,
   TextInput,
   Image,
   KeyboardAvoidingView,
@@ -24,8 +212,8 @@ import {
   useCameraPermission,
 } from 'react-native-vision-camera';
 import { redeemCoupon, getCuponDetails } from '../api/authService';
-
-
+import { useNavigation } from '@react-navigation/native';
+import { useAutoRedeem } from '../context/AutoRedeemProvider ';
 const { width, height } = Dimensions.get('window');
 
 const debounce = (func, delay) => {
@@ -37,11 +225,9 @@ const debounce = (func, delay) => {
 };
 
 export default function CameraScann({ onGoBack }) {
-  const {
-    hasPermission,
-    requestPermission
-  } = useCameraPermission();
+  const { isAutoRedeem } = useAutoRedeem(); // 👈 use shared toggle
 
+  const { hasPermission, requestPermission } = useCameraPermission();
   const [scannedData, setScannedData] = useState(null);
   const [isInitialized, setIsInitialized] = useState(false);
   const [isConfirmModalVisible, setIsConfirmModalVisible] = useState(false);
@@ -50,13 +236,14 @@ export default function CameraScann({ onGoBack }) {
   const [isApiLoading, setIsApiLoading] = useState(false);
   const [error, setError] = useState(null);
   const [isScanActive, setIsScanActive] = useState(true);
-
   const [invoiceAmount, setInvoiceAmount] = useState('');
   const [notes, setNotes] = useState('');
   const [discountedPrice, setDiscountedPrice] = useState('0.00');
   const [isRedeeming, setIsRedeeming] = useState(false);
 
   const device = useCameraDevice('back');
+  const navigation = useNavigation();
+  const lastScannedValueRef = useRef(null);
 
   useEffect(() => {
     const checkAndRequestPermission = async () => {
@@ -86,7 +273,7 @@ export default function CameraScann({ onGoBack }) {
       discount: discountValue,
       discount_type: discountType,
       amount_min: minAmount,
-      amount_max: maxAmount
+      amount_max: maxAmount,
     } = productDetails;
 
     let calculatedDiscount = 0;
@@ -99,9 +286,6 @@ export default function CameraScann({ onGoBack }) {
     }
     setDiscountedPrice(calculatedDiscount.toFixed(2));
   }, [invoiceAmount, couponData]);
-
-
-  const lastScannedValueRef = useRef(null);
 
   const resetScan = useCallback(() => {
     setScannedData(null);
@@ -121,7 +305,9 @@ export default function CameraScann({ onGoBack }) {
       const response = await getCuponDetails(couponCode);
       const data = response.data;
       if (data.status_code >= 400 || data.success === false) {
-        throw new Error(data.status_message || data.errors?.[0]?.title || 'Coupon validation failed.');
+        throw new Error(
+          data.status_message || data.errors?.[0]?.title || 'Coupon validation failed.'
+        );
       }
       setCouponData(data);
       setIsConfirmModalVisible(false);
@@ -132,7 +318,10 @@ export default function CameraScann({ onGoBack }) {
       let message = err.message || 'Network error occurred.';
       if (err.response) {
         const errorData = err.response.data;
-        message = errorData.status_message || errorData.errors?.[0]?.title || `Server Error (${err.response.status}).`;
+        message =
+          errorData.status_message ||
+          errorData.errors?.[0]?.title ||
+          `Server Error (${err.response.status}).`;
       }
       setError(message);
       setTimeout(resetScan, 3000);
@@ -150,7 +339,6 @@ export default function CameraScann({ onGoBack }) {
     setIsRedeeming(true);
     try {
       const response = await redeemCoupon(scannedData, invoiceAmount, notes);
-
       if (response.data && response.data.status_code === 200) {
         alert('Kuponi u konsumua me sukses!');
         setShowDetailsModal(false);
@@ -160,29 +348,45 @@ export default function CameraScann({ onGoBack }) {
         alert(response.data.status_message || 'Gabim gjatë konsumimit të kuponit.');
       }
     } catch (error) {
-      console.error("Redeem Error:", error);
+      console.error('Redeem Error:', error);
       alert('Gabim i papritur: ' + error.message);
     } finally {
       setIsRedeeming(false);
     }
   };
 
-  const handleCodeScanned = useCallback((codes) => {
-    if (codes.length > 0) {
-      const value = codes[0].value;
-      if (value && value !== lastScannedValueRef.current) {
-        lastScannedValueRef.current = value;
-        setScannedData(value);
-        setIsScanActive(false);
-        setIsConfirmModalVisible(true);
+  // 👇 MODIFIED PART: handleCodeScanned
+  const handleCodeScanned = useCallback(
+    (codes) => {
+      if (codes.length > 0) {
+        const value = codes[0].value;
+        if (value && value !== lastScannedValueRef.current) {
+          lastScannedValueRef.current = value;
+          setScannedData(value);
+          setIsScanActive(false);
+
+          if (isAutoRedeem) {
+            // 🔴 Auto mode — skip confirmation and go directly to details
+            handleGetCouponDetails(value);
+          } else {
+            // 🟢 Manual mode — show confirmation modal
+            setIsConfirmModalVisible(true);
+          }
+        }
       }
-    }
-  }, []);
+    },
+    [isAutoRedeem, handleGetCouponDetails]
+  );
 
   const codeScanner = useCodeScanner({
     codeTypes: ['qr'],
     onCodeScanned: handleCodeScanned,
   });
+
+
+
+
+
 
   const ConfirmationModal = () => (
     <Modal
@@ -281,16 +485,17 @@ export default function CameraScann({ onGoBack }) {
           Scan Result ({scannedData ? 'Detected' : 'Searching...'})
         </Text>
         <Text style={styles.resultValue} numberOfLines={2}>
-          {scannedData || 'Point your camera at a QR code.'}
+          {scannedData || 'Point your camera at a QR code. If scanning isn’t possible, enter the code.'}
         </Text>
-        <TouchableOpacity
+        {/* <TouchableOpacity
           style={styles.actionButton}
-          onPress={scannedData ? resetScan : onGoBack}
+          onPress={scannedData ? resetScan : () => navigation.goBack('Home')}
         >
           <Text style={styles.actionButtonText}>
-            {scannedData ? 'Scan Another Code' : 'Go Back'}
+            Go Back
+
           </Text>
-        </TouchableOpacity>
+        </TouchableOpacity> */}
       </View>
 
       <ConfirmationModal />
@@ -301,7 +506,9 @@ export default function CameraScann({ onGoBack }) {
         onRequestClose={() => {
           setShowDetailsModal(false);
           resetScan();
+
         }}
+        style={{ margin: 0 }}
       >
         <KeyboardAvoidingView
           behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
@@ -352,18 +559,31 @@ export default function CameraScann({ onGoBack }) {
               <Text style={[styles.detailsInput, { paddingVertical: 10 }]}>{discountedPrice}</Text>
             </View>
 
-            <View style={styles.detailsButtonContainer}>
+            <View style={[styles.detailsButtonContainer, { flexDirection: 'row', justifyContent: 'space-between' }]}>
+
+              <TouchableOpacity
+                style={styles.detailsButton}
+                onPress={() => { setShowDetailsModal(false); navigation.goBack('Home') }}
+              >
+                <Text style={{ color: '#fff', fontSize: 16 }}>
+                  Mbyll
+
+                </Text>
+              </TouchableOpacity>
+
               <TouchableOpacity
                 onPress={handleRedeemPress}
                 style={styles.detailsButton}
                 disabled={isRedeeming}
               >
+
                 {isRedeeming ? (
                   <ActivityIndicator color="#fff" />
                 ) : (
                   <Text style={{ color: '#fff', fontSize: 16 }}>Konsumo</Text>
                 )}
               </TouchableOpacity>
+
             </View>
           </ScrollView>
         </KeyboardAvoidingView>
@@ -422,6 +642,7 @@ const styles = StyleSheet.create({
     position: 'absolute',
     top: SCANNER_SIZE + height / 5,
     paddingHorizontal: 20,
+    marginTop: 80
   },
   guideText: {
     color: '#FFFFFF',

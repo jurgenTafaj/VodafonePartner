@@ -8,7 +8,7 @@ const Table = ({ coupon, invoice_amount, discount, added, product, addedDate, ad
       <View style={{ flexDirection: 'row' }}>
 
         <TouchableOpacity>
-          <Image source={require('../assets/icons/sm_agenda.png')} style={[styles.icon]} />
+          <Image source={require('../assets/icons/sm_agenda.png')} style={[styles.icon, styles.headerIcon]} />
         </TouchableOpacity>
 
         <View style={{ flexDirection: 'row' }}>
@@ -31,7 +31,7 @@ const Table = ({ coupon, invoice_amount, discount, added, product, addedDate, ad
           <Text style={styles.line}>{discount}</Text>
         </View>
         <View style={[styles.line3]}>
-          <Image source={require('../assets/icons/sm_produkti.png')} style={styles.icon} />
+          <Image source={require('../assets/icons/sm_produkti.png')} style={styles.iconTable} />
           <Text style={{ marginTop: 5, color: '#f00505ff', fontSize: 12 }}>{product}</Text>
         </View>
       </View>
@@ -61,10 +61,19 @@ const styles = StyleSheet.create({
   icon: {
     height: 30,
     width: 30,
-    //marginLeft: 15
+    marginLeft: 15
   },
   line: {
     marginHorizontal: 40,
+  },
+  headerIcon: {
+    height: 35,
+    width: 35
+  },
+  iconTable: {
+    height: 30,
+    width: 30,
+    marginLeft: 5
   }
 })
 

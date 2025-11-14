@@ -124,6 +124,7 @@ export default function InfoScreen() {
           <Text style={{ fontWeight: 'bold', paddingTop: 10, fontSize: 15 }}>Kërko me datë</Text>
         </View>
 
+
         <View style={styles.datePickerContainer}>
           <TouchableOpacity style={styles.buton} onPress={() => showPicker('Nga')}>
             <Text style={styles.butonText}>Nga</Text>

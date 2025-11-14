@@ -13,18 +13,20 @@ export default function LogOut() {
         <HeaderImage text1="PERDORUESI" text2="adrionadmin" imageURL="notHome" />
       </View>
 
-      <View style={{ flex: 1, marginTop: -300, padding: 50 }}>
+      <View style={{ flex: 1, marginTop: -300, padding: 50, }}>
         <Image source={require('../assets/icons/logout_red.png')} style={{ height: 100, width: 100, marginLeft: 100 }} />
-        <Text style={{ fontSize: 18, paddingVertical: 10, paddingLeft: 35 }}>Jeni i sigurt që doni të dilni?</Text>
+        <Text style={{ fontSize: 18, paddingVertical: 10, paddingLeft: 42 }}>Jeni i sigurt që doni të dilni?</Text>
 
-        <View style={{ flexDirection: 'row' }}>
+        <View style={{ flexDirection: 'row', justifyContent: 'center' }}>
           <TouchableOpacity style={[styles.butoni, { backgroundColor: '#000000ff' }]}>
             <Text style={{ color: 'rgba(255, 255, 255, 1)' }}>Jo</Text>
           </TouchableOpacity>
+
           <TouchableOpacity style={[styles.butoni, { backgroundColor: '#f14040ff' }]} onPress={signOut}>
             <Text style={{ color: 'rgba(255, 255, 255, 1)' }}>Po</Text>
           </TouchableOpacity>
         </View>
+
       </View >
     </>
   )
@@ -33,7 +35,7 @@ export default function LogOut() {
 const styles = StyleSheet.create({
   butoni: {
     backgroundColor: '#ffffffff',
-    marginHorizontal: 30,
+    marginHorizontal: 10,
     marginVertical: 10,
     paddingHorizontal: 40,
     paddingVertical: 10,

@@ -16,6 +16,7 @@ import CameraScann from './src/screens/CameraScann';
 // Import your AuthProvider and useAuth hook
 import { AuthProvider, useAuth } from './src/context/AuthContext';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
+import { AutoRedeemProvider } from './src/context/AutoRedeemProvider ';
 
 const Stack = createNativeStackNavigator();
 
@@ -49,7 +50,7 @@ const AppNavigator = () => {
           <Stack.Screen name="Logout" component={LogoutScreen} />
           <Stack.Screen name="Settings" component={SettingsScreen} />
           <Stack.Screen name="Info" component={InfoScreen} />
-          <Stack.Screen name="Scanner" component={CameraScann} />
+          <Stack.Screen name="Scanner" component={CameraScann} options={{ headerShown: false }} />
         </>
       )}
     </Stack.Navigator>
@@ -59,12 +60,15 @@ const AppNavigator = () => {
 export default function App() {
   return (
     <SafeAreaProvider>
-      <AuthProvider>
-        <NavigationContainer>
-          <AppNavigator />
+      <AutoRedeemProvider>
+        <AuthProvider>
 
-        </NavigationContainer>
-      </AuthProvider>
+          <NavigationContainer>
+            <AppNavigator />
+          </NavigationContainer>
+
+        </AuthProvider>
+      </AutoRedeemProvider>
     </SafeAreaProvider>
   );
 }
