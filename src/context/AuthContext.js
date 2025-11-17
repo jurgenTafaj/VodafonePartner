@@ -13,31 +13,31 @@ export const AuthProvider = ({ children }) => {
   const [userToken, setUserToken] = useState(null);
 
   // signIn function
-  const signIn = async (username, password) => {
-    try {
-      const response = await loginUser(username, password);
-      console.log('Login response:', response.data, " ", response.data.status_code);      
-      if (response.data.status_code === 200) {
-        const { token, refresh_token, user_id, fullname, profile_img} = response.data.data;
-        console.log('response.data.data: ' , response.data.data);
-        // Store tokens and user ID
-        await AsyncStorage.setItem('userToken', token);
-        await AsyncStorage.setItem('refreshToken', refresh_token);
-        await AsyncStorage.setItem('userId', user_id.toString()); // Store as string
-        await AsyncStorage.setItem('fullName', fullname.toString());
-        await AsyncStorage.setItem('profile_img', profile_img);
-        setUserToken(token); // Update state to trigger navigation
-      } else {
-        // Handle failed login (e.g., show error)
-        // console.error('Login failed:', response);
-        console.log('Login failed with message:', response);
-        throw new Error(response.data.message || 'Login failed');
-      }
-    } catch (error) {
-      console.error('An error occurred during sign in:', error);
-      throw error; // Re-throw to be caught in LoginScreen
+const signIn = async (username, password, recaptchaToken) => {
+  try {
+    // Pass the token to loginUser
+    const response = await loginUser(username, password, recaptchaToken);
+    console.log('Login response:', response.data, " ", response.data.status_code);
+    if (response.data.status_code === 200) {
+      const { token, refresh_token, user_id, fullname, profile_img } = response.data.data;
+      console.log('response.data.data: ', response.data.data);
+      // Store tokens and user ID
+      await AsyncStorage.setItem('userToken', token);
+      await AsyncStorage.setItem('refreshToken', refresh_token);
+      await AsyncStorage.setItem('userId', user_id.toString()); // Store as string
+      await AsyncStorage.setItem('fullName', fullname.toString());
+      await AsyncStorage.setItem('profile_img', profile_img);
+      setUserToken(token); // Update state to trigger navigation
+    } else {
+      // Handle failed login (e.g., show error)
+      console.log('Login failed with message:', response);
+      throw new Error(response.data.message || 'Login failed');
     }
-  };
+  } catch (error) {
+    console.error('An error occurred during sign in:', error);
+    throw error; // Re-throw to be caught in LoginScreen
+  }
+};
 
   // signOut function
   const signOut = async () => {

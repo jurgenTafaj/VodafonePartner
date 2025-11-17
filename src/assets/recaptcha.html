@@ -1,0 +1,20 @@
+<!-- recaptcha.html -->
+<!DOCTYPE html>
+<html>
+  <head>
+    <script src="https://www.google.com/recaptcha/api.js"></script>
+  </head>
+  <body>
+    <div
+      class="g-recaptcha"
+      data-sitekey="6LcKK60UAAAAAGc12CLNY22bt0hnGIYcUbXzDaOA"
+      data-callback="onSuccess"
+    ></div>
+
+    <script>
+      function onSuccess(token) {
+        window.ReactNativeWebView.postMessage(token);
+      }
+    </script>
+  </body>
+</html>

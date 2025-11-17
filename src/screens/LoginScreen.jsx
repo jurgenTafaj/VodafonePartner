@@ -16,17 +16,26 @@ import {
 } from 'react-native';
 import { useAuth } from '../context/AuthContext';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import CaptchTest from './CaptchTest';
 
 const LoginScreen = () => {
 
   const backgroundImage = require('../assets/icons/sm_user.png')
   const [username, setUsername] = useState(__DEV__ ? 'baboontest.eraldi' : '');
   const [password, setPassword] = useState(__DEV__ ? 'baboontest.eraldi' : '');
+  const [tokeCaptch, setTokeCaptch] = useState("")
 
   const [error, setError] = useState('');
   const [isLoggingIn, setIsLoggingIn] = useState(false);
 
   const { signIn } = useAuth();
+
+  const handleVerify = (token) => {
+    console.log("reCAPTCHA v3 Token:", token);
+    setTokeCaptch(token);
+    // send token to your backend for score verification
+  };
+
 
   const handleLogin = async () => {
     if (isLoggingIn) return;
@@ -34,7 +43,7 @@ const LoginScreen = () => {
     setError('');
 
     try {
-      await signIn(username, password);
+      await signIn(username, password, tokeCaptch);
     } catch (e) {
       setError(e.message || 'Failed to log in. Please check credentials.');
     } finally {
@@ -104,6 +113,9 @@ const LoginScreen = () => {
               </View>
             </View>
           </TouchableWithoutFeedback>
+          <View style={{ flex: 0, justifyContent: "center" }} >
+            <CaptchTest onVerify={handleVerify} />
+          </View>
         </ScrollView>
       </KeyboardAvoidingView>
     </SafeAreaView>

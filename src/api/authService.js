@@ -6,14 +6,13 @@ import AsyncStorage from '@react-native-async-storage/async-storage'; // Needed 
 // !! REPLACE THIS with your static type_id from Postman
 const TYPE_ID = '3'; 
 
-export const loginUser = (username, password) => {
+export const loginUser = (username, password, recaptchaToken) => { 
   const formData = new FormData();
   formData.append('action', 'login');
   formData.append('type_id', TYPE_ID);
   formData.append('username', username);
   formData.append('password', password);
-  formData.append('recaptcha_response', ''); // As requested
-
+  formData.append('recaptcha_response', recaptchaToken); 
   // The request interceptor in apiClient will handle the token if needed
   return apiClient.post('/', formData);
 };

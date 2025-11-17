@@ -1,9 +1,9 @@
 // App.jsx
 
-import React from 'react';
+import React, {useState} from 'react';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { NavigationContainer } from '@react-navigation/native';
-import { ActivityIndicator, View } from 'react-native'; // Import ActivityIndicator
+import { ActivityIndicator, Text, View } from 'react-native'; // Import ActivityIndicator
 
 // Import your screens
 import HomeScreen from './src/screens/HomeScreen';
